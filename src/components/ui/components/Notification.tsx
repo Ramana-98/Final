@@ -1,8 +1,9 @@
 import React from "react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Bell, MessageCircle, Briefcase, Eye, UserPlus, CreditCard, Rocket, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useNotifications } from "@/context/NotificationContext";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -33,38 +34,52 @@ export function NotificationsDropdown() {
         {/* Only notification content below, no bell icon */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <span className="font-semibold text-lg text-gray-900 dark:text-gray-100">Notifications</span>
-          <button
-            className="text-xs text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300 p-0 h-auto"
             onClick={markAllAsRead}
           >
             Mark all as read
-          </button>
+          </Button>
         </div>
         <div className="max-h-80 overflow-y-auto hide-scrollbar-mobile">
-          {loading ? (
-            <div className="p-4 text-center text-gray-400 dark:text-gray-500">Loading...</div>
-          ) : notifications.length === 0 ? (
-            <div className="p-4 text-center text-gray-400 dark:text-gray-500">No notifications</div>
+                  {loading ? (
+          <Card className="p-4 text-center text-gray-400 dark:text-gray-500 dark:bg-gray-800 dark:border-gray-700">
+            <CardContent className="p-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+              <p>Loading...</p>
+            </CardContent>
+          </Card>
+        ) : notifications.length === 0 ? (
+          <Card className="p-4 text-center text-gray-400 dark:text-gray-500 dark:bg-gray-800 dark:border-gray-700">
+            <CardContent className="p-4">
+              <Bell className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+              <p>No notifications</p>
+            </CardContent>
+          </Card>
           ) : (
             notifications.map((n) => (
-              <div
+              <Card
                 key={n.id}
-                className={`flex items-start gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 ${
+                className={`flex items-start gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 rounded-none border-x-0 border-t-0 ${
                   n.unread ? "bg-blue-50 dark:bg-blue-900/20 font-semibold" : "bg-white dark:bg-gray-800"
                 }`}
               >
-                <div className="mt-1">{notificationIcons[n.type]}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate text-gray-900 dark:text-gray-100">{n.text}</div>
-                  {n.meta && (
-                    <span className="inline-block bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded px-2 py-0.5 mt-1 mr-2">
-                      {n.meta}
-                    </span>
-                  )}
-                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{n.time}</div>
-                </div>
-                {n.unread && <span className="w-2 h-2 bg-blue-500 rounded-full mt-2" />}
-              </div>
+                <CardContent className="p-0 flex items-start gap-3 w-full">
+                  <div className="mt-1">{notificationIcons[n.type]}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm truncate text-gray-900 dark:text-gray-100">{n.text}</div>
+                    {n.meta && (
+                      <Badge variant="secondary" className="mt-1 mr-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                        {n.meta}
+                      </Badge>
+                    )}
+                    <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{n.time}</div>
+                  </div>
+                  {n.unread && <span className="w-2 h-2 bg-blue-500 rounded-full mt-2" />}
+                </CardContent>
+              </Card>
             ))
           )}
         </div>
@@ -144,9 +159,9 @@ export function NotificationPage() {
                       {notification.text}
                     </div>
                     {notification.meta && (
-                      <span className="inline-block bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded px-2 py-0.5 mt-2 mr-2">
+                      <Badge variant="secondary" className="mt-2 mr-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
                         {notification.meta}
-                      </span>
+                      </Badge>
                     )}
                     <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{notification.time}</div>
                   </div>

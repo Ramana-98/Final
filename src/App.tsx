@@ -8,7 +8,7 @@ import WalletPage from './components/ui/components/WalletPage';
 import ProjectsPage from './components/ui/components/ProjectsPage';
 import Settings from './components/ui/components/Settings';
 import { NotificationsDropdown } from './components/ui/components/Notification';
-import NotificationPage from './components/ui/components/NotificationPage';
+
 import { Toaster } from "sonner";
 import './App.css';
 
@@ -51,7 +51,7 @@ function AppContent() {
         <Route path="/discover" element={<Discover onBack={() => navigate("/Home")} />} />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/projects" element={<ProjectsPage onBack={() => navigate("/Home")} />} />
-        <Route path="/notifications" element={<NotificationPage />} />
+        
         {/* Add more routes as needed */}
       </Routes>
       <Toaster />

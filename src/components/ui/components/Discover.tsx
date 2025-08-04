@@ -7,6 +7,7 @@ import { Carousel, CarouselItem, CarouselContent, CarouselPrevious, CarouselNext
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
 import { useEffect } from "react";
@@ -362,13 +363,47 @@ export default function Discover({ onBack }: DiscoverProps) {
             <div className="col-span-2 text-center text-gray-500 dark:text-gray-400 py-8">Not Found</div>
           ) : (
             featuredProjects.map(project => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onApply={handleApply}
-                isSaved={savedProjects.has(project.id)}
-                onToggleSave={handleToggleSave}
-              />
+               <Card key={project.id} className="bg-gradient-to-br from-white via-[#f7f9fc] to-[#eaf1fb] hover:shadow-lg transition-all duration-200 dark:from-gray-800 dark:to-gray-700 dark:border-gray-600">
+                 <CardContent className="p-4 flex flex-col gap-2">
+                   <div className="flex items-center justify-between">
+                     <CardTitle className="font-semibold text-base text-gray-900 dark:text-gray-200">{project.title}</CardTitle>
+                     {project.featured && <Badge className="bg-yellow-400 text-black">Featured</Badge>}
+                   </div>
+                   <div className="flex gap-2 flex-wrap">
+                     {project.skills.map(skill => (
+                       <Badge key={skill} className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">{skill}</Badge>
+                     ))}
+                   </div>
+                   <div className="text-sm text-gray-600 dark:text-gray-600">{project.type} • {project.budget}</div>
+                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-600">
+                     <span>{project.client.name} ({project.client.location})</span>
+                     <span className="flex items-center gap-1">
+                       <Star className="w-3 h-3 text-yellow-400" />
+                       {project.client.rating}
+                     </span>
+                     <span>• {project.posted}</span>
+                   </div>
+                   <div className="flex gap-2 mt-2">
+                     <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600" onClick={() => handleApply(project)}>
+                       📝 Apply Now
+                     </Button>
+                     <Button
+                       size="sm"
+                       variant="outline"
+                       onClick={() => handleToggleSave(project)}
+                       aria-pressed={savedProjects.has(project.id)}
+                       className="bg-gradient-to-r from-blue-500 to-green-400 hover:from-pink-500 hover:to-yellow-500 text-white dark:from-blue-600 dark:to-green-400 dark:hover:from-pink-500 dark:hover:to-yellow-500"
+                     >
+                       {savedProjects.has(project.id) ? (
+                         <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                       ) : (
+                         <Heart className="w-4 h-4" />
+                       )}
+                       {savedProjects.has(project.id) ? "Saved" : "Save"}
+                     </Button>
+                   </div>
+                 </CardContent>
+               </Card>
             ))
           )}
         </div>
@@ -383,13 +418,47 @@ export default function Discover({ onBack }: DiscoverProps) {
           <div className="col-span-2 text-center text-gray-500 dark:text-gray-400 py-8">Not Found</div>
         ) : (
           regularProjects.map(project => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onApply={handleApply}
-              isSaved={savedProjects.has(project.id)}
-              onToggleSave={handleToggleSave}
-            />
+             <Card key={project.id} className="bg-gradient-to-br from-white via-[#f7f9fc] to-[#eaf1fb] hover:shadow-lg transition-all duration-200 dark:from-gray-800 dark:to-gray-700 dark:border-gray-600">
+               <CardContent className="p-4 flex flex-col gap-2">
+                 <div className="flex items-center justify-between">
+                   <CardTitle className="font-semibold text-base text-gray-900 dark:text-gray-200">{project.title}</CardTitle>
+                   {project.featured && <Badge className="bg-yellow-400 text-black">Featured</Badge>}
+                 </div>
+                 <div className="flex gap-2 flex-wrap">
+                   {project.skills.map(skill => (
+                     <Badge key={skill} className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">{skill}</Badge>
+                   ))}
+                 </div>
+                 <div className="text-sm text-gray-600 dark:text-gray-600">{project.type} • {project.budget}</div>
+                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-600">
+                   <span>{project.client.name} ({project.client.location})</span>
+                   <span className="flex items-center gap-1">
+                     <Star className="w-3 h-3 text-yellow-400" />
+                     {project.client.rating}
+                   </span>
+                   <span>• {project.posted}</span>
+                 </div>
+                 <div className="flex gap-2 mt-2">
+                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600" onClick={() => handleApply(project)}>
+                     📝 Apply Now
+                   </Button>
+                   <Button
+                     size="sm"
+                     variant="outline"
+                     onClick={() => handleToggleSave(project)}
+                     aria-pressed={savedProjects.has(project.id)}
+                     className="bg-gradient-to-r from-blue-500 to-green-400 hover:from-pink-500 hover:to-yellow-500 text-white dark:from-blue-600 dark:to-green-400 dark:hover:from-pink-500 dark:hover:to-yellow-500"
+                   >
+                     {savedProjects.has(project.id) ? (
+                       <Heart className="w-4 h-4 fill-red-500 text-red-500" />
+                     ) : (
+                       <Heart className="w-4 h-4" />
+                     )}
+                     {savedProjects.has(project.id) ? "Saved" : "Save"}
+                   </Button>
+                 </div>
+               </CardContent>
+             </Card>
           ))
         )}
       </div>
@@ -412,52 +481,3 @@ type Project = {
   posted: string;
   category: string;
 };
-
-function ProjectCard({ project, onApply, isSaved, onToggleSave }: {
-  project: Project;
-  onApply?: (project: Project) => void;
-  isSaved?: boolean;
-  onToggleSave?: (project: Project) => void;
-}) {
-  return (
-    <div className="bg-gradient-to-br from-white via-[#f7f9fc] to-[#eaf1fb] rounded-lg shadow p-4 flex flex-col gap-2 border hover:shadow-lg transition dark:from-gray-800 dark:to-gray-700 dark:border-gray-600">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-base text-gray-900 dark:text-gray-200">{project.title}</h3>
-        {project.featured && <Badge className="bg-yellow-400 text-black">Featured</Badge>}
-      </div>
-      <div className="flex gap-2 flex-wrap">
-        {project.skills.map(skill => (
-          <Badge key={skill} className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">{skill}</Badge>
-        ))}
-      </div>
-      <div className="text-sm text-gray-600 dark:text-gray-600">{project.type} • {project.budget}</div>
-      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-600">
-        <span>{project.client.name} ({project.client.location})</span>
-        <span className="flex items-center gap-1">
-          <Star className="w-3 h-3 text-yellow-400" />
-          {project.client.rating}
-        </span>
-        <span>• {project.posted}</span>
-      </div>
-      <div className="flex gap-2 mt-2">
-        <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600" onClick={() => onApply && onApply(project)}>
-          📝 Apply Now
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => onToggleSave && onToggleSave(project)}
-          aria-pressed={isSaved}
-          className="bg-gradient-to-r from-blue-500 to-green-400 hover:from-pink-500 hover:to-yellow-500 text-white dark:from-blue-600 dark:to-green-400 dark:hover:from-pink-500 dark:hover:to-yellow-500"
-        >
-          {isSaved ? (
-            <Heart className="w-4 h-4 fill-red-500 text-red-500" />
-          ) : (
-            <Heart className="w-4 h-4" />
-          )}
-          {isSaved ? "Saved" : "Save"}
-        </Button>
-      </div>
-    </div>
-  );
-}

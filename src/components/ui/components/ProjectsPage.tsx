@@ -1,10 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, X } from "lucide-react"
 import React, { useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 
@@ -129,12 +131,13 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
   return (
     <div className="min-h-screen bg-gray-200 dark:bg-gray-900 px-4 md:px-8 py-6 space-y-6 transition-colors duration-200">
       <div className="flex items-center gap-4 mb-6">
-        <button
+        <Button
           onClick={onBack}
-          className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium shadow-sm border border-gray-200 dark:border-gray-700 transition-colors text-gray-900 dark:text-gray-100"
+          variant="outline"
+          className="px-4 py-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium shadow-sm border border-gray-200 dark:border-gray-700 transition-colors text-gray-900 dark:text-gray-100"
         >
           ← Back
-        </button>
+        </Button>
         <h1 className="text-3xl font-bold m-0 text-gray-800 dark:text-gray-100">Your Projects</h1>
       </div>
 
@@ -255,48 +258,52 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
         </Button>
       </div>
       
-      {selectedProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full max-w-md relative mx-4">
-            <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl font-bold"
+      <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-gray-800 dark:text-gray-100">
+              {selectedProject?.title}
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-4 right-4 h-6 w-6 p-0"
               onClick={() => setSelectedProject(null)}
             >
-              ×
-            </button>
-            <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">{selectedProject.title}</h2>
-            <div className="space-y-2 text-sm">
-              <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Rate:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject.rate}</span></p>
-              <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Status:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject.status}</span></p>
-              <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Type:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject.type}</span></p>
-              <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Mode:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject.mode}</span></p>
-              <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Country:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject.country}</span></p>
-              <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Posted:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject.timeAgo}</span></p>
-            </div>
-            {/* Feedback/Notes Textarea */}
-            <div className="mt-6">
-              <label htmlFor="project-note" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes / Feedback</label>
-              <Textarea
-                id="project-note"
-                placeholder="Add notes, feedback, or comments about this project..."
-                value={projectNote}
-                onChange={e => setProjectNote(e.target.value)}
-                className="w-full min-h-[80px] rounded-lg border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              />
-              <Button
-                className="mt-3 w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg font-medium"
-                onClick={() => {
-                  toast("Note saved!");
-                  setProjectNote("");
-                }}
-                disabled={!projectNote.trim()}
-              >
-                Submit
-              </Button>
-            </div>
+              <X className="h-4 w-4" />
+            </Button>
+          </DialogHeader>
+          <div className="space-y-2 text-sm">
+            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Rate:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.rate}</span></p>
+            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Status:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.status}</span></p>
+            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Type:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.type}</span></p>
+            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Mode:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.mode}</span></p>
+            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Country:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.country}</span></p>
+            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Posted:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.timeAgo}</span></p>
           </div>
-        </div>
-      )}
+          {/* Feedback/Notes Textarea */}
+          <div className="mt-6">
+            <Label htmlFor="project-note" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes / Feedback</Label>
+            <Textarea
+              id="project-note"
+              placeholder="Add notes, feedback, or comments about this project..."
+              value={projectNote}
+              onChange={e => setProjectNote(e.target.value)}
+              className="w-full min-h-[80px] rounded-lg border-gray-200 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            />
+            <Button
+              className="mt-3 w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg font-medium"
+              onClick={() => {
+                toast("Note saved!");
+                setProjectNote("");
+              }}
+              disabled={!projectNote.trim()}
+            >
+              Submit
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

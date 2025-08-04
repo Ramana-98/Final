@@ -4,11 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Search, Settings, Menu, X, Home, MessageCircle, Compass, Wallet as WalletIcon, Folder, User, LogOut, Check, Camera, Image, Bell, Moon, Sun } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Search, Settings, Menu, X, Home, MessageCircle, Compass, Wallet as WalletIcon, Folder, User, LogOut, Check, Camera, Image, Bell, Moon, Sun, Mail, Star, Clock, AlertCircle } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { NotificationsDropdown } from "./Notification";
-import { useNotifications } from "@/context/NotificationContext";
-import { useDarkMode } from "@/context/DarkModeContext";
 
 
 
@@ -40,8 +41,9 @@ const sectionTitles = [
 
 export default function Header({ onOpenSettings, onOpenNotifications, onOpenMessages, onOpenDiscover, onOpenWallet, onOpenProjects, searchValue, setSearchValue, onSearchTrigger, onOpenHome }: HeaderProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const { hasUnreadNotifications } = useNotifications();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+  const [hasUnreadNotifications, setHasUnreadNotifications] = React.useState(true);
+  const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [profileData, setProfileData] = React.useState({
     name: "User Name",
@@ -68,6 +70,151 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
   const [isResizing, setIsResizing] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [notFound, setNotFound] = useState(false);
+
+  // Initialize dark mode state based on document class
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains('dark');
+    setIsDarkMode(isDark);
+  }, []);
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.notification-dropdown')) {
+        setNotificationsOpen(false);
+      }
+    };
+
+    if (notificationsOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [notificationsOpen]);
+
+  // Sample notifications data
+  const [notifications, setNotifications] = React.useState([
+    {
+      id: 1,
+      title: "New message from John Doe",
+      message: "Hey! I have a new project for you...",
+      time: "2 minutes ago",
+      type: "message",
+      unread: true
+    },
+    {
+      id: 2,
+      title: "Payment received",
+      message: "You received $500 for Project Alpha",
+      time: "1 hour ago",
+      type: "payment",
+      unread: true
+    },
+    {
+      id: 3,
+      title: "Project deadline reminder",
+      message: "Project Beta is due in 2 days",
+      time: "3 hours ago",
+      type: "reminder",
+      unread: false
+    },
+    {
+      id: 4,
+      title: "New client request",
+      message: "Sarah Johnson wants to discuss a project",
+      time: "5 hours ago",
+      type: "request",
+      unread: false
+    }
+  ]);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    // Toggle dark mode on document
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+  };
+
+  const markAllAsRead = () => {
+    console.log('Mark all as read clicked');
+    setHasUnreadNotifications(false);
+    // Mark all notifications as read
+    setNotifications(prevNotifications => 
+      prevNotifications.map(notification => ({
+        ...notification,
+        unread: false
+      }))
+    );
+  };
+
+  const handleNotificationClick = (notificationId: number) => {
+    console.log('Notification clicked with ID:', notificationId);
+    // Handle notification click - you can add navigation or other actions here
+    const notification = notifications.find(n => n.id === notificationId);
+    if (notification) {
+      console.log('Notification found:', notification);
+      
+      // Mark notification as read
+      setNotifications(prevNotifications => 
+        prevNotifications.map(n => 
+          n.id === notificationId 
+            ? { ...n, unread: false }
+            : n
+        )
+      );
+      
+      // Update unread count
+      const updatedNotifications = notifications.map(n => 
+        n.id === notificationId 
+          ? { ...n, unread: false }
+          : n
+      );
+      const hasUnread = updatedNotifications.some(n => n.unread);
+      setHasUnreadNotifications(hasUnread);
+      
+      // Handle different notification types
+      switch (notification.type) {
+        case 'message':
+          onOpenMessages();
+          break;
+        case 'payment':
+          onOpenWallet();
+          break;
+        case 'reminder':
+          onOpenProjects();
+          break;
+        case 'request':
+          onOpenDiscover();
+          break;
+        default:
+          console.log('Unknown notification type:', notification.type);
+      }
+      
+      // Close notification popover
+      setNotificationsOpen(false);
+    }
+  };
+
+  // Function to add a test notification
+  const addTestNotification = () => {
+    console.log('Add test notification clicked');
+    const newNotification = {
+      id: Date.now(),
+      title: "Test notification",
+      message: "This is a test notification to verify functionality",
+      time: "Just now",
+      type: "message",
+      unread: true
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+    setHasUnreadNotifications(true);
+  };
 
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
@@ -219,13 +366,15 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
       {/* Left: Hamburger (mobile/tablet) + Logo */}
       <div className="flex items-center gap-3">
         {/* Hamburger Icon (only on md and below, left side) */}
-        <button
-          className="block lg:hidden mr-2"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="block lg:hidden mr-2 p-0"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open menu"
         >
           <Menu className="w-7 h-7" />
-        </button>
+        </Button>
         {/* Logo */}
         <div className="font-bold text-xl text-orange-600 dark:text-orange-400 flex items-center">
           {/* Letter logo */}
@@ -252,27 +401,47 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
       </div>
       {/* Nav Items (hidden on md and below, visible on lg and up) */}
       <div className="hidden lg:flex gap-3">
-        <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={onOpenHome} >Home</button>
-        <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={onOpenMessages}>Messages</button>
-        <button className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={onOpenDiscover}>Discover</button>
-        <button
-          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+        <Button 
+          variant="ghost" 
+          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50" 
+          onClick={onOpenHome}
+        >
+          Home
+        </Button>
+        <Button 
+          variant="ghost" 
+          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50" 
+          onClick={onOpenMessages}
+        >
+          Messages
+        </Button>
+        <Button 
+          variant="ghost" 
+          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50" 
+          onClick={onOpenDiscover}
+        >
+          Discover
+        </Button>
+        <Button
+          variant="ghost"
+          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
           onClick={onOpenWallet}
         >
           Wallet
-        </button>
-        <button
-          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+        </Button>
+        <Button
+          variant="ghost"
+          className="text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
           onClick={onOpenProjects}
         >
           Projects
-        </button>
+        </Button>
       </div>
       {/* Right side icons */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 md:gap-3 lg:gap-4">
         
         {/* Search bar (only on small screens) */}
-        <div className="relative block  sm:hidden">
+        <div className="relative block sm:hidden ml-2 md:ml-4 lg:ml-2">
           <Input
             type="text"
             placeholder="Search..."
@@ -283,22 +452,26 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                 onSearchTrigger();
               }
             }}
-            className="w-24 pl-7 pr-7 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+            className="w-16 md:w-14 lg:w-16 pl-5 pr-5 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           />
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+          <Search className="absolute left-1 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-3 h-3" />
           {searchValue && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={clearSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-0 h-auto"
               aria-label="Clear search"
             >
-              <X className="w-4 h-4" />
-            </button>
+              <X className="w-3 h-3" />
+            </Button>
           )}
           {notFound && (
-            <div className="absolute left-0 mt-2 w-full bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 text-red-500 dark:text-red-400 rounded p-2 text-center shadow">
-              Not Found
-            </div>
+            <Card className="absolute left-0 mt-2 w-full bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 text-red-500 dark:text-red-400 rounded p-2 text-center shadow">
+              <CardContent className="p-2 text-center">
+                Not Found
+              </CardContent>
+            </Card>
           )}
         </div>
         
@@ -317,25 +490,31 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
           {searchValue && (
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0 h-auto"
               aria-label="Clear search"
             >
               <X className="w-4 h-4" />
-            </button>
+            </Button>
           )}
           {notFound && (
-            <div className="absolute left-0 mt-2 w-full bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 text-red-500 dark:text-red-400 rounded p-2 text-center shadow">
-              Not Found
-            </div>
+            <Card className="absolute left-0 mt-2 w-full bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 text-red-500 dark:text-red-400 rounded p-2 text-center shadow">
+              <CardContent className="p-2 text-center">
+                Not Found
+              </CardContent>
+            </Card>
           )}
         </div>
         
-        {/* Dark Mode Toggle */}
-        <button 
+        {/* Dark Mode Toggle (hidden on small screens) */}
+        <Button 
+          variant="ghost"
+          size="sm"
           onClick={toggleDarkMode}
-          className="rounded-full bg-white dark:bg-gray-700 p-2.5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-105"
+          className="hidden sm:flex rounded-full bg-white dark:bg-gray-700 p-2.5 items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 transform hover:scale-105"
           aria-label="Toggle dark mode"
         >
           {isDarkMode ? (
@@ -343,34 +522,183 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
           ) : (
             <Moon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
           )}
-        </button>
+        </Button>
         
         {/* Settings and Bell icons (hidden on small screens) */}
-        <div className="hidden sm:flex items-center gap-4 overflow-y-auto">
-          <button className="rounded-full bg-white dark:bg-gray-700 p-2.5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition" onClick={onOpenSettings}>
+        <div className="hidden sm:flex items-center gap-4">
+          <Button 
+            variant="ghost"
+            size="sm"
+            className="rounded-full bg-white dark:bg-gray-700 p-2.5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition" 
+            onClick={onOpenSettings}
+          >
             <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
-          </button>
-          <NotificationsDropdown />
-          
+          </Button>
+          <div className="relative notification-dropdown">
+            <Button 
+              variant="ghost"
+              size="sm"
+              className="rounded-full bg-white dark:bg-gray-700 p-2.5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition relative"
+              onClick={() => {
+                console.log('Bell icon clicked');
+                setNotificationsOpen(!notificationsOpen);
+              }}
+            >
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
+              {hasUnreadNotifications && (
+                <Badge className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full p-0 border-0" />
+              )}
+            </Button>
+            
+            {notificationsOpen && (
+              <div className="absolute right-0 mt-2 w-80 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto scrollbar-hide">
+                <div className="flex items-center justify-between mb-3">
+                  <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">Notifications</CardTitle>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={addTestNotification}
+                      className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
+                    >
+                      Add Test
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={markAllAsRead}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                    >
+                      Mark all read
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {notifications.map((notification) => (
+                    <Card 
+                      key={notification.id} 
+                      className={`${notification.unread ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'} hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer`}
+                      onClick={() => handleNotificationClick(notification.id)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <Badge className={`w-2 h-2 rounded-full mt-2 p-0 border-0 ${notification.unread ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-500'}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between">
+                              <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{notification.title}</CardTitle>
+                              <Badge variant="secondary" className="text-xs text-gray-500 dark:text-gray-400 ml-2 bg-transparent border-0">
+                                {notification.time}
+                              </Badge>
+                            </div>
+                            <Badge variant="secondary" className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 bg-transparent border-0 p-0">
+                              {notification.message}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {notifications.length === 0 && (
+                  <Card className="text-center py-4 bg-transparent border-0 shadow-none">
+                    <CardContent className="p-4">
+                      <Bell className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                      <Badge variant="secondary" className="text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0">
+                        No notifications
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
         </div>
 
-        {/* Notification button for small screens - HIDDEN */}
-        {/* <div className="sm:hidden">
-          <button 
+        </div>
+
+        {/* Notification button for small screens */}
+        <div className="sm:hidden relative notification-dropdown">
+          <Button 
+            variant="ghost"
+            size="sm"
             className="rounded-full bg-white dark:bg-gray-700 p-2.5 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-600 transition relative" 
-            onClick={onOpenNotifications}
+            onClick={() => {
+              console.log('Mobile bell icon clicked');
+              setNotificationsOpen(!notificationsOpen);
+            }}
           >
             <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 dark:text-gray-300" />
             {hasUnreadNotifications && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
+              <Badge className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full p-0 border-0" />
             )}
-          </button>
-        </div> */}
+          </Button>
+          
+          {notificationsOpen && (
+            <div className="absolute right-0 mt-2 w-72 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-80 overflow-y-auto scrollbar-hide">
+              <div className="flex items-center justify-between mb-3">
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">Notifications</CardTitle>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={addTestNotification}
+                    className="text-xs text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
+                  >
+                    Add Test
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={markAllAsRead}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                  >
+                    Mark all read
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {notifications.map((notification) => (
+                  <Card 
+                    key={notification.id} 
+                    className={`${notification.unread ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'} hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer`}
+                    onClick={() => handleNotificationClick(notification.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-start gap-3">
+                        <Badge className={`w-2 h-2 rounded-full mt-2 p-0 border-0 ${notification.unread ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-500'}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between">
+                            <CardTitle className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{notification.title}</CardTitle>
+                            <Badge variant="secondary" className="text-xs text-gray-500 dark:text-gray-400 ml-2 bg-transparent border-0">
+                              {notification.time}
+                            </Badge>
+                          </div>
+                          <Badge variant="secondary" className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 bg-transparent border-0 p-0">
+                          {notification.message}
+                        </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {notifications.length === 0 && (
+                <Card className="text-center py-4 bg-transparent border-0 shadow-none">
+                  <CardContent className="p-4">
+                    <Bell className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                    <Badge variant="secondary" className="text-sm text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0">
+                      No notifications
+                    </Badge>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
         
         {/* Avatar with Popover Menu */}
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
-            <button className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-full">
+            <Button variant="ghost" className="focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-full p-0 h-auto">
               <Avatar className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer hover:opacity-80 transition-opacity">
                 <AvatarImage 
                   src={profileData.image} 
@@ -380,59 +708,72 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                   U
                 </AvatarFallback>
               </Avatar>
-            </button>
+            </Button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-3 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700" align="end">
             <div className="space-y-3">
               {!isAuthenticated ? (
                 <>
                   <div className="px-2 py-2 border-b border-gray-100 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Guest User</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Please sign in to continue</p>
+                    <Badge variant="secondary" className="text-sm font-medium text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">
+                      Guest User
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0">
+                      Please sign in to continue
+                    </Badge>
                   </div>
-                  <button 
+                  <Button 
+                    variant="ghost"
                     onClick={handleSignInOut}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors justify-start"
                   >
                     <User className="w-4 h-4" />
                     Sign In
-                  </button>
+                  </Button>
                 </>
               ) : !isEditing ? (
                 <>
                   <div className="px-2 py-2 border-b border-gray-100 dark:border-gray-700">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{profileData.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{profileData.email}</p>
+                    <Badge variant="secondary" className="text-sm font-medium text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">
+                      {profileData.name}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0">
+                      {profileData.email}
+                    </Badge>
                   </div>
-                  <button 
+                  <Button 
+                    variant="ghost"
                     onClick={handleEditProfile}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors justify-start"
                   >
                     <User className="w-4 h-4" />
                     Edit Profile
-                  </button>
+                  </Button>
                   
                   <div className="border-t border-gray-100 dark:border-gray-700 pt-2">
-                    <button 
+                    <Button 
+                      variant="ghost"
                       onClick={handleSignInOut}
-                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors justify-start"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
-                    </button>
+                    </Button>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Edit Profile</h3>
-                      <button
+                      <CardTitle className="text-sm font-semibold text-gray-900 dark:text-gray-100">Edit Profile</CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={handleCancelEdit}
-                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0 h-auto"
                       >
                         <X className="w-4 h-4" />
-                      </button>
+                      </Button>
                     </div>
                     
                     <div className="space-y-3">
@@ -451,31 +792,43 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                             </Avatar>
                           </div>
                           <div className="flex flex-col gap-2">
-                            <label className="flex items-center justify-center gap-2 px-3 py-2 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors cursor-pointer">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center justify-center gap-2 px-3 py-2 text-xs bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-colors cursor-pointer"
+                              onClick={() => {
+                                const input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (e) => {
+                                  const target = e.target as HTMLInputElement;
+                                  handleFileSelect({ target } as React.ChangeEvent<HTMLInputElement>);
+                                };
+                                input.click();
+                              }}
+                            >
                               <Image className="w-3 h-3" />
                               Gallery
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileSelect}
-                                className="hidden"
-                              />
-                            </label>
-                            <button
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               type="button"
                               onClick={() => setShowImageGallery(true)}
                               className="flex items-center justify-center gap-2 px-3 py-2 text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md transition-colors"
                             >
                               <Image className="w-3 h-3" />
                               Sample
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
                               type="button"
                               className="flex items-center justify-center gap-2 px-3 py-2 text-xs bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md transition-colors"
                             >
                               <Camera className="w-3 h-3" />
                               Camera
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -534,53 +887,44 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
               )}
             </div>
             {/* Cancel/Close button for small screens */}
-            <button
-              className="absolute top-2 right-2 sm:hidden text-gray-400 hover:text-gray-600"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute top-2 right-2 sm:hidden text-gray-400 hover:text-gray-600 p-0 h-auto"
               onClick={() => setPopoverOpen(false)}
               aria-label="Close"
             >
               ×
-            </button>
+            </Button>
           </PopoverContent>
         </Popover>
 
-        {/* Image Gallery Popover */}
-        {showImageGallery && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Choose Profile Image</h3>
-                <button
-                  onClick={() => setShowImageGallery(false)}
-                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        {/* Image Gallery Dialog */}
+        <Dialog open={showImageGallery} onOpenChange={setShowImageGallery}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-full max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">Choose Profile Image</DialogTitle>
+            </DialogHeader>
               
-              <div className="p-4">
                 <div className="grid grid-cols-3 gap-3">
                   {sampleImages.map((image, index) => (
-                    <button
+                    <Button
                       key={index}
+                      variant="outline"
                       onClick={() => handleImageSelect(image)}
-                      className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
+                      className={`relative group rounded-lg overflow-hidden border-2 transition-all p-0 h-auto ${
                         tempData.image === image 
                           ? 'border-blue-500 ring-2 ring-blue-200' 
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                     >
-                      <img
-                        src={image}
-                        alt={`Profile option ${index + 1}`}
-                        className="w-full h-20 object-cover"
-                      />
+                      <div className="w-full h-20 bg-cover bg-center" style={{ backgroundImage: `url(${image})` }} />
                       {tempData.image === image && (
                         <div className="absolute inset-0 bg-blue-500 bg-opacity-20 flex items-center justify-center">
                           <Check className="w-5 h-5 text-white bg-blue-500 rounded-full p-1" />
                         </div>
                       )}
-                    </button>
+                    </Button>
                   ))}
                 </div>
                 
@@ -605,72 +949,62 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                     </Button>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
+              </DialogContent>
+            </Dialog>
 
         {/* Logout Confirmation Alert */}
-        {showLogoutAlert && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm">
-              <div className="p-6">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-                    <LogOut className="w-6 h-6 text-red-600 dark:text-red-400" />
-                  </div>
-                </div>
-                
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-2">
-                  Are you sure logout?
-                </h3>
-                
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
-                  You will be logged out and your profile will be reset to default.
-                </p>
-                
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowLogoutAlert(false)}
-                    className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    No
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleLogoutConfirm}
-                    className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
-                  >
-                    Yes
-                  </Button>
+        <AlertDialog open={showLogoutAlert} onOpenChange={setShowLogoutAlert}>
+          <AlertDialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <AlertDialogHeader>
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                  <LogOut className="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+              <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                Are you sure logout?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                You will be logged out and your profile will be reset to default.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                No
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleLogoutConfirm}
+                className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
+              >
+                Yes
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Login Page Modal */}
-        {showLoginPage && (
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">RAMZZ</h2>
-                <button
+        <Dialog open={showLoginPage} onOpenChange={setShowLoginPage}>
+          <DialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-full max-w-md">
+            <DialogHeader>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">RAMZZ</DialogTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setShowLoginPage(false)}
-                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0 h-auto"
                 >
                   <X className="w-6 h-6" />
-                </button>
+                </Button>
               </div>
+            </DialogHeader>
               
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
+                <CardTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
                   Create an Account
-                </h3>
+                </CardTitle>
                 
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="fullName" className="text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                       Full Name
@@ -743,21 +1077,25 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                   <Button
                     type="submit"
                     className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 mt-6"
+                    onClick={handleLoginSubmit}
                   >
                     Submit
                   </Button>
-                </form>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </DialogContent>
+          </Dialog>
 
         {/* Success Alert */}
         {showSuccessAlert && (
-          <div className="fixed top-4 right-4 z-50 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2">
-            <Check className="w-5 h-5" />
-            <span className="font-medium">Login successfully</span>
-          </div>
+          <Card className="fixed top-4 right-4 z-50 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 border-0">
+            <CardContent className="p-0 flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <Badge variant="secondary" className="font-medium bg-transparent border-0 text-white">
+              Login successfully
+            </Badge>
+            </CardContent>
+          </Card>
         )}
       </div>
 
@@ -772,26 +1110,54 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
             style={{ width: sidebarWidth, minWidth: 180, maxWidth: 400 }}
           >
             {/* Sidebar content here */}
-            <button
-              className="mb-6 ml-auto"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mb-6 ml-auto p-0"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close menu"
             >
               <X className="w-6 h-6" />
-            </button>
-            <button className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={() => { onOpenHome(); setSidebarOpen(false); }}><Home className="w-4 h-4 sm:w-5 sm:h-5" /> Home</button>
-            <button className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={onOpenMessages}><MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" /> Messages</button>
-            <button className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={() => { onOpenDiscover?.(); setSidebarOpen(false); }}><Compass className="w-4 h-4 sm:w-5 sm:h-5" /> Discover</button>
-            <button
-              className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+            </Button>
+            <Button 
+              variant="ghost"
+              className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50 justify-start" 
+              onClick={() => { onOpenHome(); setSidebarOpen(false); }}
+            >
+              <Home className="w-4 h-4 sm:w-5 sm:h-5" /> Home
+            </Button>
+            <Button 
+              variant="ghost"
+              className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50 justify-start" 
+              onClick={onOpenMessages}
+            >
+              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5" /> Messages
+            </Button>
+            <Button 
+              variant="ghost"
+              className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50 justify-start" 
+              onClick={() => { onOpenDiscover?.(); setSidebarOpen(false); }}
+            >
+              <Compass className="w-4 h-4 sm:w-5 sm:h-5" /> Discover
+            </Button>
+            <Button
+              variant="ghost"
+              className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50 justify-start"
               onClick={() => { onOpenWallet?.(); setSidebarOpen(false); }}
             >
               <WalletIcon className="w-4 h-4 sm:w-5 sm:h-5" /> Wallet
-            </button>
-            <a href="#" className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md px-3 py-2 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700/50" onClick={() => { onOpenProjects?.(); setSidebarOpen(false); }}><Folder className="w-4 h-4 sm:w-5 sm:h-5" /> Projects</a>
+            </Button>
+            <Button
+              variant="ghost"
+              className="mb-4 font-medium text-lg text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 text-left w-full flex items-center gap-3 hover:scale-110 hover:animate-pulse transition-all duration-200 ease-in-out transform hover:shadow-md hover:bg-gray-200/50 dark:hover:bg-gray-700/50 justify-start"
+              onClick={() => { onOpenProjects?.(); setSidebarOpen(false); }}
+            >
+              <Folder className="w-4 h-4 sm:w-5 sm:h-5" /> Projects
+            </Button>
             {/* Settings and Bell icons (only on small screens) */}
             <div className="sm:hidden mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-              <button
+              <Button
+                variant="ghost"
                 className="flex items-center gap-3 px-4 py-2 w-full justify-start text-left text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold text-lg hover:animate-pulse transition-all duration-200"
                 onClick={() => {
                   onOpenSettings?.();
@@ -800,17 +1166,23 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
               >
                 <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
                 Settings
-              </button>
-              <button
+              </Button>
+
+              <Button
+                variant="ghost"
                 className="flex items-center gap-3 px-4 py-2 w-full justify-start text-left text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 font-semibold text-lg hover:animate-pulse transition-all duration-200"
                 onClick={() => {
-                  onOpenNotifications?.();
+                  toggleDarkMode();
                   setSidebarOpen(false);
                 }}
               >
-                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-                Notifications
-              </button>
+                {isDarkMode ? (
+                  <Sun className="w-4 h-4 sm:w-5 sm:h-5" />
+                ) : (
+                  <Moon className="w-4 h-4 sm:w-5 sm:h-5" />
+                )}
+                Dark Mode
+              </Button>
             </div>
             {/* Drag handle */}
             <div

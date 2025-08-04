@@ -9,7 +9,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CalendarIcon, ChevronDown, TrendingUp, Users, DollarSign, MessageSquare, Star, ArrowRight, Plus, CheckIcon, Settings, FileText, Moon } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { ToastProvider, ToastViewport } from "@/components/ui/toast";
+import { CalendarIcon, ChevronDown, TrendingUp, Users, DollarSign, MessageSquare, Star, ArrowRight, Plus, CheckIcon, Settings, FileText, Moon, CreditCard, Building2, CheckCircle, AlertCircle, Crown, Zap, Shield, Globe } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { cn } from "@/lib/utils";
  
 
@@ -86,9 +91,68 @@ export default function Home({ searchValue }: HomeProps) {
       { day: "S", amount: 1500 },
     ];
 
-    const currentData = weekData;
-    const getSummaryPercentage = () => "+20%";
-    const getSummaryText = () => "This week's income is higher than last week's";
+    const monthData = [
+      { day: "W1", amount: 8500 },
+      { day: "W2", amount: 9200 },
+      { day: "W3", amount: 8800 },
+      { day: "W4", amount: 9500 },
+    ];
+
+    const yearData = [
+      { day: "Jan", amount: 45000 },
+      { day: "Feb", amount: 52000 },
+      { day: "Mar", amount: 48000 },
+      { day: "Apr", amount: 55000 },
+      { day: "May", amount: 51000 },
+      { day: "Jun", amount: 58000 },
+      { day: "Jul", amount: 54000 },
+      { day: "Aug", amount: 61000 },
+      { day: "Sep", amount: 57000 },
+      { day: "Oct", amount: 64000 },
+      { day: "Nov", amount: 60000 },
+      { day: "Dec", amount: 67000 },
+    ];
+
+    const getCurrentData = () => {
+      switch (selectedPeriod) {
+        case 'week':
+          return weekData;
+        case 'month':
+          return monthData;
+        case 'year':
+          return yearData;
+        default:
+          return weekData;
+      }
+    };
+
+    const getSummaryPercentage = () => {
+      switch (selectedPeriod) {
+        case 'week':
+          return "+20%";
+        case 'month':
+          return "+15%";
+        case 'year':
+          return "+25%";
+        default:
+          return "+20%";
+      }
+    };
+
+    const getSummaryText = () => {
+      switch (selectedPeriod) {
+        case 'week':
+          return "This week's income is higher than last week's";
+        case 'month':
+          return "This month's income is higher than last month's";
+        case 'year':
+          return "This year's income is higher than last year's";
+        default:
+          return "This week's income is higher than last week's";
+      }
+    };
+
+    const currentData = getCurrentData();
 
     return (
       <Card
@@ -107,15 +171,48 @@ export default function Home({ searchValue }: HomeProps) {
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm w-full sm:w-auto mt-2 sm:mt-0">
-                  Week
+                  {selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}
                   <ChevronDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-32 sm:w-40 p-2">
                 <div className="space-y-1">
-                  <Button variant="ghost" size="sm" className="w-full justify-start">Week</Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">Month</Button>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">Year</Button>
+                  <Button 
+                    variant={selectedPeriod === 'week' ? 'default' : 'ghost'} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setSelectedPeriod('week');
+                      setSelectedDay(null);
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    Week
+                  </Button>
+                  <Button 
+                    variant={selectedPeriod === 'month' ? 'default' : 'ghost'} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setSelectedPeriod('month');
+                      setSelectedDay(null);
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    Month
+                  </Button>
+                  <Button 
+                    variant={selectedPeriod === 'year' ? 'default' : 'ghost'} 
+                    size="sm" 
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setSelectedPeriod('year');
+                      setSelectedDay(null);
+                      setIsPopoverOpen(false);
+                    }}
+                  >
+                    Year
+                  </Button>
                 </div>
               </PopoverContent>
             </Popover>
@@ -146,7 +243,10 @@ export default function Home({ searchValue }: HomeProps) {
                   return (
                     <Tooltip key={i}>
                       <TooltipTrigger asChild>
-                        <div className="flex flex-col items-center gap-1 cursor-pointer">
+                        <div 
+                          className="flex flex-col items-center gap-1 cursor-pointer"
+                          onClick={() => setSelectedDay(isSelected ? null : i)}
+                        >
                           {isSelected && (
                             <div className="text-xs font-medium bg-black dark:bg-white text-white dark:text-black rounded-full px-2 py-0.5 mb-1">
                               ${d.amount.toLocaleString()}
@@ -171,7 +271,7 @@ export default function Home({ searchValue }: HomeProps) {
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="font-medium">${d.amount.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Click to select {d.day}day's data</p>
+                        <p className="text-xs text-muted-foreground">Click to select {d.day}'s data</p>
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -199,13 +299,13 @@ export default function Home({ searchValue }: HomeProps) {
       { name: "Chen Wei", role: "DevOps Engineer", level: "Middle", avatar: "CW", avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face" },
     ];
 
-    const displayedUsers = showAll ? users : users.slice(0, 4);
+    const displayedUsers = showAll ? users : users.slice(0, 2);
 
     return (
       <Card
         ref={letsConnectRef}
         className={cn(
-          "p-2 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-55 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+           "p-2 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Let's Connect")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
@@ -226,8 +326,12 @@ export default function Home({ searchValue }: HomeProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                 <CardContent className="flex-1 overflow-hidden">
+           <div className={cn(
+             "h-full",
+             showAll ? "overflow-y-auto scrollbar-hide" : ""
+           )}>
+            <div className="space-y-2">
             {displayedUsers.map((user, idx) => (
               <div key={idx} className="flex items-center gap-3 p-2 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                 <Avatar className="w-8 h-8">
@@ -245,14 +349,18 @@ export default function Home({ searchValue }: HomeProps) {
                   <Button
                     size="sm"
                     variant={connected[idx] ? "outline" : "default"}
-                    className="w-6 h-6 p-0 rounded-full"
+                       className={cn(
+                         "w-6 h-6 p-0 rounded-full",
+                         connected[idx] && "border-green-500 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                       )}
                     onClick={() => setConnected(prev => prev.map((val, i) => i === idx ? !val : val))}
                   >
-                    {connected[idx] ? <CheckIcon className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+                       {connected[idx] ? <CheckIcon className="w-3 h-3 text-green-600 dark:text-green-400" /> : <Plus className="w-3 h-3" />}
                   </Button>
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -261,42 +369,210 @@ export default function Home({ searchValue }: HomeProps) {
 
   // Upgrade Premium Component
   const UpgradePremium = () => {
+    const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const { toast } = useToast();
+
+    const plans = [
+      {
+        id: 'monthly',
+        name: 'Monthly Plan',
+        price: 29,
+        period: 'month',
+        popular: false,
+        savings: null
+      },
+      {
+        id: 'yearly',
+        name: 'Yearly Plan',
+        price: 290,
+        period: 'year',
+        popular: true,
+        savings: 'Save 17%'
+      }
+    ];
+
+    const benefits = [
+      { icon: Crown, title: "Priority Support", description: "Get faster response times and dedicated support" },
+      { icon: Zap, title: "Advanced Analytics", description: "Detailed insights into your earnings and performance" },
+      { icon: Shield, title: "Enhanced Security", description: "Advanced security features and data protection" },
+      { icon: Globe, title: "Global Opportunities", description: "Access to international projects and clients" },
+      { icon: Users, title: "Premium Networking", description: "Connect with top-tier clients and professionals" },
+      { icon: Star, title: "Featured Profile", description: "Your profile appears first in search results" }
+    ];
+
+    const handleUpgrade = async () => {
+      setIsProcessing(true);
+      
+      try {
+        // Simulate payment processing
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Show success toast
+        toast({
+          title: "Upgrade Successful!",
+          description: `Welcome to Premium! You now have access to all premium features.`,
+          action: <CheckCircle className="w-4 h-4 text-green-500" />,
+        });
+        
+        setIsUpgradeModalOpen(false);
+      } catch (error) {
+        // Show error toast
+        toast({
+          title: "Upgrade Failed",
+          description: "There was an error processing your payment. Please try again.",
+          action: <AlertCircle className="w-4 h-4 text-red-500" />,
+        });
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    const selectedPlanData = plans.find(plan => plan.id === selectedPlan);
+
     return (
+      <>
       <Card
         ref={upgradePremiumRef}
         className={cn(
-          "p-2 bg-gradient-to-br from-purple-500 to-blue-600 text-white shadow-xs flex flex-col h-55 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+           "p-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-in-out transform hover:scale-105",
           normalize(searchValue).includes(normalize("Upgrade Premium")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
-        <CardHeader className="-mt-4">
-          <CardTitle className="text-base sm:text-xl font-bold text-white">
-            Upgrade to Premium
+                   <CardHeader className="pb-3 text-left">
+             <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 animate-fade-in">
+               Unlock Premium Features
           </CardTitle>
+             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-left animate-fade-in-delay">
+               Get access to exclusive benefits and expand your freelancing opportunities.
+             </p>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col justify-between">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-yellow-300" />
-              <span className="text-sm">Unlimited projects</span>
+           <CardContent className="pt-4">
+             <Dialog open={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen}>
+               <DialogTrigger asChild>
+                 <Button className="group w-full bg-gray-900 dark:bg-gray-800 text-white hover:bg-gray-800 dark:hover:bg-gray-700 rounded-lg py-3 transition-all duration-500 ease-in-out transform hover:scale-105 hover:shadow-xl hover:shadow-gray-900/20 animate-pulse hover:animate-none">
+                   <span className="flex items-center justify-between w-full">
+                     <span className="transition-all duration-300 ease-in-out group-hover:translate-x-1">Upgrade now</span>
+                     <ArrowRight className="w-4 h-4 transition-all duration-300 ease-in-out group-hover:translate-x-2 group-hover:scale-110" />
+                   </span>
+                </Button>
+               </DialogTrigger>
+               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                 <DialogHeader>
+                   <DialogTitle className="text-2xl font-bold text-center">
+                     <Crown className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+                     Choose Your Premium Plan
+                   </DialogTitle>
+                   <DialogDescription className="text-center">
+                     Select the plan that best fits your needs and unlock premium features
+                   </DialogDescription>
+                 </DialogHeader>
+
+                 {/* Plan Selection */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                   {plans.map((plan) => (
+                     <div
+                       key={plan.id}
+                       className={cn(
+                         "relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200",
+                         selectedPlan === plan.id
+                           ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                       )}
+                       onClick={() => setSelectedPlan(plan.id as 'monthly' | 'yearly')}
+                     >
+                       {plan.popular && (
+                         <Badge className="absolute -top-2 left-1/2 transform -translate-x-1/2 bg-green-500 text-white">
+                           Most Popular
+                         </Badge>
+                       )}
+                       <div className="text-center">
+                         <h3 className="font-semibold text-lg">{plan.name}</h3>
+                         <div className="mt-2">
+                           <span className="text-3xl font-bold">${plan.price}</span>
+                           <span className="text-gray-500 dark:text-gray-400">/{plan.period}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-green-300" />
-              <span className="text-sm">Advanced analytics</span>
+                         {plan.savings && (
+                           <p className="text-sm text-green-600 dark:text-green-400 mt-1">{plan.savings}</p>
+                         )}
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-300" />
-              <span className="text-sm">Priority support</span>
             </div>
+                   ))}
           </div>
           
-          <Button className="w-full bg-white text-purple-600 hover:bg-gray-100 mt-4">
-            Upgrade Now
-            <ArrowRight className="w-4 h-4 ml-2" />
+                 {/* Premium Benefits */}
+                 <div className="mb-6">
+                   <h3 className="font-semibold text-lg mb-4">Premium Benefits</h3>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                     {benefits.map((benefit, index) => {
+                       const IconComponent = benefit.icon;
+                       return (
+                         <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                           <IconComponent className="w-5 h-5 text-blue-500 mt-0.5" />
+                           <div>
+                             <h4 className="font-medium text-sm">{benefit.title}</h4>
+                             <p className="text-xs text-gray-600 dark:text-gray-400">{benefit.description}</p>
+                           </div>
+                         </div>
+                       );
+                     })}
+                   </div>
+                 </div>
+
+                 {/* Payment Summary */}
+                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
+                   <h3 className="font-semibold mb-3">Payment Summary</h3>
+                   <div className="space-y-2">
+                     <div className="flex justify-between">
+                       <span>Plan:</span>
+                       <span>{selectedPlanData?.name}</span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span>Amount:</span>
+                       <span className="font-semibold">${selectedPlanData?.price}</span>
+                     </div>
+                     <div className="border-t pt-2 mt-2">
+                       <div className="flex justify-between font-semibold">
+                         <span>Total:</span>
+                         <span>${selectedPlanData?.price}</span>
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+
+                 <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                   <Button
+                     variant="outline"
+                     onClick={() => setIsUpgradeModalOpen(false)}
+                     className="w-full sm:w-auto"
+                   >
+                     Cancel
           </Button>
+                   <Button
+                     onClick={handleUpgrade}
+                     disabled={isProcessing}
+                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+                   >
+                     {isProcessing ? (
+                       <>
+                         <CheckCircle className="w-4 h-4 mr-2 animate-spin" />
+                         Processing...
+                       </>
+                     ) : (
+                       <>
+                         <CreditCard className="w-4 h-4 mr-2" />
+                         Upgrade to Premium
+                       </>
+                     )}
+                   </Button>
+                 </DialogFooter>
+               </DialogContent>
+             </Dialog>
         </CardContent>
       </Card>
+      </>
     );
   };
 
@@ -383,13 +659,13 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={yourRecentProjectsRef}
         className={cn(
-          "p-3 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-[442px] w-full max-w-4xl mx-auto hover:shadow-sm hover:-translate-y-1 transition-all duration-200",
+          " bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-[442px] w-full max-w-4xl mx-auto hover:shadow-sm hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Your Recent Project")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
         <CardHeader className="-mt-4 pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100">
+            <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 text-left">
               Your Recent Projects
             </CardTitle>
             <Button 
@@ -495,13 +771,13 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={proposalProgressRef}
         className={cn(
-          "p-4 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-55 w-full max-w-4xl mx-auto hover:shadow-sm hover:-translate-y-1 transition-all duration-200",
+           "p-4 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-sm hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Proposal Progress")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
         <CardHeader className="-mt-4 pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100">
+            <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 text-left">
               Proposal Progress
             </CardTitle>
             <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
@@ -570,16 +846,58 @@ export default function Home({ searchValue }: HomeProps) {
 
   // Earning Breakdown Component
   const EarningBreakdown = () => {
+    const weeklyData = [
+      { period: "Mon", Freelance: 2450, Consulting: 1200, Training: 800 },
+      { period: "Tue", Freelance: 2800, Consulting: 1400, Training: 900 },
+      { period: "Wed", Freelance: 3200, Consulting: 1600, Training: 1100 },
+      { period: "Thu", Freelance: 2900, Consulting: 1300, Training: 850 },
+      { period: "Fri", Freelance: 3100, Consulting: 1500, Training: 1000 },
+      { period: "Sat", Freelance: 2600, Consulting: 1200, Training: 750 },
+      { period: "Sun", Freelance: 2400, Consulting: 1100, Training: 700 },
+    ];
+
+    const monthlyData = [
+      { period: "Week 1", Freelance: 8450, Consulting: 4200, Training: 2800 },
+      { period: "Week 2", Freelance: 9200, Consulting: 4800, Training: 3200 },
+      { period: "Week 3", Freelance: 8800, Consulting: 4400, Training: 2900 },
+      { period: "Week 4", Freelance: 9500, Consulting: 5000, Training: 3500 },
+    ];
+
+    const yearlyData = [
+      { period: "Jan", Freelance: 98450, Consulting: 52200, Training: 28800 },
+      { period: "Feb", Freelance: 102300, Consulting: 54800, Training: 31200 },
+      { period: "Mar", Freelance: 98700, Consulting: 52100, Training: 28900 },
+      { period: "Apr", Freelance: 105600, Consulting: 56900, Training: 33400 },
+      { period: "May", Freelance: 101200, Consulting: 53800, Training: 30100 },
+      { period: "Jun", Freelance: 108900, Consulting: 58700, Training: 35600 },
+    ];
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+            <p className="font-medium text-gray-900 dark:text-gray-100">{label}</p>
+            {payload.map((entry: any, index: number) => (
+              <p key={index} className="text-sm" style={{ color: entry.color }}>
+                {entry.name}: ${entry.value.toLocaleString()}
+              </p>
+            ))}
+          </div>
+        );
+      }
+      return null;
+    };
+
     return (
       <Card
         ref={earningBreakdownRef}
         className={cn(
-          "p-2 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          " bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Earning Breakdown")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
-        <CardHeader className="-mt-4">
-          <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100">
+        <CardHeader className="-mt-4 pb-3">
+          <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 text-center">
             Earning Breakdown
           </CardTitle>
         </CardHeader>
@@ -591,52 +909,79 @@ export default function Home({ searchValue }: HomeProps) {
               <TabsTrigger value="monthly">Monthly</TabsTrigger>
               <TabsTrigger value="yearly">Yearly</TabsTrigger>
             </TabsList>
+            
             <TabsContent value="weekly" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Freelance Projects</span>
-                  <span className="font-medium">$2,450</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Consulting</span>
-                  <span className="font-medium">$1,200</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Training</span>
-                  <span className="font-medium">$800</span>
-                </div>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="period" 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                    />
+                    <RechartsTooltip content={<CustomTooltip />} />
+                    <Legend />
+                    <Bar dataKey="Freelance" stackId="a" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="Consulting" stackId="a" fill="#10b981" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="Training" stackId="a" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </TabsContent>
+            
             <TabsContent value="monthly" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Freelance Projects</span>
-                  <span className="font-medium">$8,450</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Consulting</span>
-                  <span className="font-medium">$4,200</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Training</span>
-                  <span className="font-medium">$2,800</span>
-                </div>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="period" 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                    />
+                    <RechartsTooltip content={<CustomTooltip />} />
+                    <Legend />
+                    <Bar dataKey="Freelance" stackId="a" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="Consulting" stackId="a" fill="#10b981" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="Training" stackId="a" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </TabsContent>
+            
             <TabsContent value="yearly" className="mt-4">
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Freelance Projects</span>
-                  <span className="font-medium">$98,450</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Consulting</span>
-                  <span className="font-medium">$52,200</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Training</span>
-                  <span className="font-medium">$28,800</span>
-                </div>
+              <div className="h-48 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={yearlyData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="period" 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 12, fill: '#6b7280' }}
+                      axisLine={{ stroke: '#e5e7eb' }}
+                      tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                    />
+                    <RechartsTooltip content={<CustomTooltip />} />
+                    <Legend />
+                    <Bar dataKey="Freelance" stackId="a" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="Consulting" stackId="a" fill="#10b981" radius={[2, 2, 0, 0]} />
+                    <Bar dataKey="Training" stackId="a" fill="#f59e0b" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </TabsContent>
           </Tabs>
@@ -647,48 +992,442 @@ export default function Home({ searchValue }: HomeProps) {
 
   // Client Feedback Component
   const ClientFeedback = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
     const feedbacks = [
-      { name: "Sarah Johnson", rating: 5, comment: "Excellent work and communication!", avatar: "SJ" },
-      { name: "Mike Chen", rating: 4, comment: "Great quality, delivered on time.", avatar: "MC" },
-      { name: "Emma Davis", rating: 5, comment: "Highly recommend this professional.", avatar: "ED" },
+      { 
+        name: "Sarah Johnson", 
+        rating: 5, 
+        comment: "Excellent work and communication! The project was delivered ahead of schedule with outstanding quality. Highly recommend working with this professional.", 
+        avatar: "SJ" 
+      },
+      { 
+        name: "Mike Chen", 
+        rating: 4, 
+        comment: "Great quality, delivered on time. Very professional and responsive throughout the entire process. The technical expertise demonstrated was impressive.", 
+        avatar: "MC" 
+      },
+      { 
+        name: "Emma Davis", 
+        rating: 5, 
+        comment: "Highly recommend this professional. Exceeded all expectations and provided exceptional value. The work ethic and attention to detail were outstanding.", 
+        avatar: "ED" 
+      },
+      { 
+        name: "David Wilson", 
+        rating: 5, 
+        comment: "Outstanding attention to detail and creative solutions. Will definitely work together again! The problem-solving approach was innovative and effective.", 
+        avatar: "DW" 
+      },
+      { 
+        name: "Lisa Rodriguez", 
+        rating: 4, 
+        comment: "Very reliable and skilled developer. The final product was exactly what we needed. The technical implementation was flawless.", 
+        avatar: "LR" 
+      },
+      { 
+        name: "James Thompson", 
+        rating: 5, 
+        comment: "Exceptional problem-solving skills and excellent communication. Highly satisfied with the results. The ability to understand complex requirements was impressive.", 
+        avatar: "JT" 
+      },
+      { 
+        name: "Maria Garcia", 
+        rating: 4, 
+        comment: "Professional, punctual, and delivers quality work. Great experience working together. The project was executed with precision and attention to detail.", 
+        avatar: "MG" 
+      },
+      { 
+        name: "Robert Kim", 
+        rating: 5, 
+        comment: "Amazing work ethic and technical expertise. The project exceeded our expectations completely. The innovative approach to problem-solving was effective.", 
+        avatar: "RK" 
+      },
     ];
+
+    // Auto-advance slider
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % feedbacks.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }, [feedbacks.length]);
 
     return (
       <Card
         ref={clientFeedbackRef}
         className={cn(
-          "p-2 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          " bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Client Feedback")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
-        <CardHeader className="-mt-4">
-          <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100">
+        <CardHeader className="-mt-4 pb-3">
+          <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 text-center">
             Client Feedback
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-y-auto">
-          <div className="space-y-3">
+                 <CardContent className="flex-1 relative overflow-hidden min-h-[200px] sm:min-h-[250px]">
+           <div className="relative h-full min-h-[180px] sm:min-h-[220px]">
             {feedbacks.map((feedback, idx) => (
-              <div key={idx} className="p-3 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <div className="flex items-start gap-3">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs">{feedback.avatar}</AvatarFallback>
+               <div
+                 key={idx}
+                                                     className={cn(
+                    "absolute inset-0 p-2 rounded-lg bg-white dark:bg-gray-700 transition-all duration-500 ease-in-out",
+                   idx === currentIndex 
+                     ? "opacity-100 translate-x-0" 
+                     : idx === (currentIndex + 1) % feedbacks.length
+                     ? "opacity-0 translate-x-full"
+                     : idx === (currentIndex - 1 + feedbacks.length) % feedbacks.length
+                     ? "opacity-0 -translate-x-full"
+                     : "opacity-0 translate-x-full"
+                  )}
+               >
+                                                      <div className="flex flex-col items-center justify-center h-full text-center p-2">
+                     <Avatar className="w-8 h-8 sm:w-10 sm:h-10 mb-2">
+                       <AvatarFallback className="text-xs sm:text-sm font-medium">{feedback.avatar}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{feedback.name}</span>
-                      <div className="flex items-center gap-1">
+                     <div className="flex items-center gap-1 sm:gap-2 mb-2">
+                       <span className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{feedback.name}</span>
+                       <div className="flex items-center gap-0.5">
                         {[...Array(feedback.rating)].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                           <Star key={i} className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
                     </div>
-                    <p className="text-xs text-muted-foreground dark:text-gray-400">{feedback.comment}</p>
+                     <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4 sm:line-clamp-5 max-w-xs sm:max-w-sm">{feedback.comment}</p>
                   </div>
                 </div>
-              </div>
             ))}
+              </div>
+           
+           {/* Enhanced Slider Controls */}
+           <div className="absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1 sm:space-x-2">
+             {feedbacks.map((_, idx) => (
+               <button
+                 key={idx}
+                 onClick={() => setCurrentIndex(idx)}
+                 className={cn(
+                   "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110",
+                   idx === currentIndex 
+                     ? "bg-blue-500 dark:bg-blue-400 shadow-lg" 
+                     : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
+                 )}
+               />
+            ))}
+          </div>
+           
+           {/* Navigation Arrows */}
+           <button
+             onClick={() => setCurrentIndex((prev) => (prev - 1 + feedbacks.length) % feedbacks.length)}
+             className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 opacity-80 hover:opacity-100"
+           >
+             <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 rotate-90 mx-auto" />
+           </button>
+           <button
+             onClick={() => setCurrentIndex((prev) => (prev + 1) % feedbacks.length)}
+             className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 opacity-80 hover:opacity-100"
+           >
+             <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 -rotate-90 mx-auto" />
+           </button>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // Next Payout Component
+  const NextPayout = () => {
+    const [selectedBank, setSelectedBank] = useState("Chase Bank •••• 1234");
+    const [showDetails, setShowDetails] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isScheduling, setIsScheduling] = useState(false);
+    const [scheduledDate, setScheduledDate] = useState<Date>();
+    const [isSchedulePopoverOpen, setIsSchedulePopoverOpen] = useState(false);
+    const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+    const { toast } = useToast();
+    
+    const handleProcessPayout = async () => {
+      setIsProcessing(true);
+      
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Show success toast
+        toast({
+          title: "Payout Processed Successfully!",
+          description: `$${payoutData.amount.toLocaleString()} has been transferred to ${selectedBank}. Transaction ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          action: <CheckCircle className="w-4 h-4 text-green-500" />,
+        });
+      } catch (error) {
+        // Show error toast
+        toast({
+          title: "Payout Failed",
+          description: "There was an error processing your payout. Please try again.",
+          action: <AlertCircle className="w-4 h-4 text-red-500" />,
+        });
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    const handleSchedulePayout = async () => {
+      if (!scheduledDate) return;
+      
+      setIsScheduling(true);
+      setIsScheduleDialogOpen(false);
+      
+      try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Show success toast
+        toast({
+          title: "Payout Scheduled Successfully!",
+          description: `$${payoutData.amount.toLocaleString()} will be transferred to ${selectedBank} on ${scheduledDate.toLocaleDateString()}. Schedule ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+          action: <CheckCircle className="w-4 h-4 text-green-500" />,
+        });
+        
+        // Reset states
+        setScheduledDate(undefined);
+        setIsSchedulePopoverOpen(false);
+      } catch (error) {
+        // Show error toast
+        toast({
+          title: "Schedule Failed",
+          description: "There was an error scheduling your payout. Please try again.",
+          action: <AlertCircle className="w-4 h-4 text-red-500" />,
+        });
+      } finally {
+        setIsScheduling(false);
+      }
+    };
+    
+    const payoutData = {
+      amount: 2847.50,
+      date: "Dec 15, 2024",
+      projects: ["Web Development Project", "UI/UX Design Project"],
+      bankAccount: "Chase Bank •••• 1234",
+      breakdown: [
+        { project: "Web Development Project", amount: 1847.50, hours: 45 },
+        { project: "UI/UX Design Project", amount: 1000.00, hours: 25 }
+      ],
+      bankOptions: [
+        "Chase Bank •••• 1234",
+        "Wells Fargo •••• 5678",
+        "Bank of America •••• 9012"
+      ]
+    };
+
+    return (
+      <Card
+        className={cn(
+          "p- bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          normalize(searchValue).includes(normalize("Next Payout")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
+        )}
+      >
+        <CardHeader className="-mt-4 pb-2">
+          <div className="flex items-center justify-center relative">
+            <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 text-center">
+              Next Payout
+            </CardTitle>
+            <CreditCard className="w-5 h-5 text-gray-500 dark:text-gray-400 absolute right-0" />
+          </div>
+        </CardHeader>
+
+        <CardContent className="flex-1 space-y-1">
+          {/* Payout Amount */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                ${payoutData.amount.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <CalendarIcon className="w-4 h-4" />
+              <span>{payoutData.date}</span>
+            </div>
+          </div>
+
+          {/* Interactive Breakdown Toggle */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Linked Projects</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDetails(!showDetails)}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                {showDetails ? 'Hide Details' : 'Show Details'}
+              </Button>
+            </div>
+            
+            <div className="h-16 overflow-hidden">
+              {showDetails ? (
+                <div className="space-y-2 bg-white dark:bg-gray-700 rounded-lg p-3 h-full overflow-y-auto">
+                  {payoutData.breakdown.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                        <span className="text-gray-600 dark:text-gray-400 truncate">{item.project}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-500 dark:text-gray-400">{item.hours}h</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">${item.amount.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {payoutData.projects.map((project, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                      <span className="truncate">{project}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Bank Account Selection */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Bank Account</span>
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-between text-xs h-8"
+                >
+                  <span className="truncate">{selectedBank}</span>
+                  <ChevronDown className="w-3 h-3" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-2">
+                <div className="space-y-1">
+                  {payoutData.bankOptions.map((bank, idx) => (
+                    <Button
+                      key={idx}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-xs h-7"
+                      onClick={() => setSelectedBank(bank)}
+                    >
+                      {bank}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  size="sm" 
+                  className="flex-1 text-xs h-8"
+                  disabled={isProcessing}
+                >
+                  <CreditCard className="w-3 h-3 mr-1" />
+                  {isProcessing ? "Processing..." : "Process Payout"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Payout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to process a payout of ${payoutData.amount.toLocaleString()} to {selectedBank}?
+                  </AlertDialogDescription>
+                  <div className="mt-4">
+                    <strong className="text-sm text-muted-foreground">Linked Projects:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      {payoutData.projects.map((project, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground">{project}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleProcessPayout}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Confirm Payout
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            
+            {/* Schedule Button with Popover Calendar */}
+            <Popover open={isSchedulePopoverOpen} onOpenChange={setIsSchedulePopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-xs h-8"
+                  disabled={isScheduling}
+                >
+                  <CalendarIcon className="w-3 h-3 mr-1" />
+                  {isScheduling ? "Scheduling..." : "Schedule"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={scheduledDate}
+                  onSelect={(date) => {
+                    setScheduledDate(date);
+                    if (date) {
+                      setIsSchedulePopoverOpen(false);
+                      setIsScheduleDialogOpen(true);
+                    }
+                  }}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+            
+            {/* Schedule Confirmation Dialog */}
+            <AlertDialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Scheduled Payout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to schedule a payout of ${payoutData.amount.toLocaleString()} to {selectedBank} for {scheduledDate?.toLocaleDateString()}?
+                  </AlertDialogDescription>
+                  <div className="mt-4">
+                    <strong className="text-sm text-muted-foreground">Linked Projects:</strong>
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                      {payoutData.projects.map((project, idx) => (
+                        <li key={idx} className="text-sm text-muted-foreground">{project}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleSchedulePayout}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Confirm Schedule
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardContent>
       </Card>
@@ -697,7 +1436,9 @@ export default function Home({ searchValue }: HomeProps) {
 
   return (
     <>
+      <ToastProvider>
     <main className="w-full bg-gray-200 dark:bg-gray-800 px-4 sm:px-6 py-6 lg:py-8 max-w-[1400px] mx-auto transition-colors duration-200">
+          <div className="relative">
       {/* Main Grid Layout: Left (2/3) + Right (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Left Section - 2/3 width */}
@@ -723,10 +1464,15 @@ export default function Home({ searchValue }: HomeProps) {
         </div>
         {/* Earnings Breakdown - Row 3, below Let's Connect */}
         <EarningBreakdown />
+            {/* Next Payout - Row 3, below Earnings Breakdown */}
+            <NextPayout />
         {/* Client Feedback - Row 3, below Proposal Progress */}
         <ClientFeedback />
       </div>
+      </div>
     </main>
+        <ToastViewport />
+      </ToastProvider>
     </>
   );
 }
