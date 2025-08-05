@@ -7,7 +7,7 @@ import Discover from './components/ui/components/Discover';
 import WalletPage from './components/ui/components/WalletPage';
 import ProjectsPage from './components/ui/components/ProjectsPage';
 import Settings from './components/ui/components/Settings';
-import { NotificationsDropdown } from './components/ui/components/Notification';
+
 
 import { Toaster } from "sonner";
 import './App.css';
@@ -41,7 +41,7 @@ function AppContent() {
         onSearchTrigger={() => {}}
       />
       {/* Modals */}
-      {showNotifications && <NotificationsDropdown />}
+      
       {/* Main Routes */}
       <Routes>
         <Route path="/" element={<Navigate to="/Home" replace />} />
