@@ -298,24 +298,15 @@ export default function Discover({ onBack }: DiscoverProps) {
       {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4 mb-6">
         <div className="flex items-center gap-2">
-          <button
-            className="back-btn"
+          <Button
             onClick={onBack}
             aria-label="Back to Dashboard"
-            style={{
-              background: "#1a202c",
-              color: "#fff",
-              border: "none",
-              borderRadius: "8px",
-              padding: "8px 12px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              marginRight: "8px"
-            }}
+            variant="outline"
+            size="sm"
+            className="bg-gray-900 dark:bg-gray-800 text-white border-gray-900 dark:border-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700"
           >
             ←
-          </button>
+          </Button>
           <div className="relative flex-1 min-w-[120px]">
             <Input
               placeholder="Search projects..."
@@ -324,14 +315,16 @@ export default function Discover({ onBack }: DiscoverProps) {
               className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
             />
             {search && (
-              <button
+              <Button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 aria-label="Clear search"
               >
                 ×
-              </button>
+              </Button>
             )}
           </div>
         </div>

@@ -469,7 +469,7 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
           {notFound && (
             <Card className="absolute left-0 mt-2 w-full bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 text-red-500 dark:text-red-400 rounded p-2 text-center shadow">
               <CardContent className="p-2 text-center">
-                Not Found
+              Not Found
               </CardContent>
             </Card>
           )}
@@ -503,7 +503,7 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
           {notFound && (
             <Card className="absolute left-0 mt-2 w-full bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 text-red-500 dark:text-red-400 rounded p-2 text-center shadow">
               <CardContent className="p-2 text-center">
-                Not Found
+              Not Found
               </CardContent>
             </Card>
           )}
@@ -956,16 +956,16 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
         <AlertDialog open={showLogoutAlert} onOpenChange={setShowLogoutAlert}>
           <AlertDialogContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
             <AlertDialogHeader>
-              <div className="flex items-center justify-center mb-4">
-                <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-                  <LogOut className="w-6 h-6 text-red-600 dark:text-red-400" />
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                    <LogOut className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  </div>
                 </div>
-              </div>
               <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
-                Are you sure logout?
+                  Are you sure logout?
               </AlertDialogTitle>
               <AlertDialogDescription className="text-sm text-gray-500 dark:text-gray-400 text-center">
-                You will be logged out and your profile will be reset to default.
+                  You will be logged out and your profile will be reset to default.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -973,10 +973,10 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                 No
               </AlertDialogCancel>
               <AlertDialogAction 
-                onClick={handleLogoutConfirm}
-                className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
-              >
-                Yes
+                    onClick={handleLogoutConfirm}
+                    className="flex-1 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white"
+                  >
+                    Yes
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -1081,8 +1081,8 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
                   >
                     Submit
                   </Button>
-                </div>
               </div>
+            </div>
             </DialogContent>
           </Dialog>
 
@@ -1090,7 +1090,7 @@ export default function Header({ onOpenSettings, onOpenNotifications, onOpenMess
         {showSuccessAlert && (
           <Card className="fixed top-4 right-4 z-50 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 border-0">
             <CardContent className="p-0 flex items-center gap-2">
-              <Check className="w-5 h-5" />
+            <Check className="w-5 h-5" />
               <Badge variant="secondary" className="font-medium bg-transparent border-0 text-white">
               Login successfully
             </Badge>

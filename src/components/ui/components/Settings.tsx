@@ -56,19 +56,20 @@ export default function Settings() {
               <div>
                 <Label htmlFor="photo-upload" className="block mb-1 text-left text-gray-900 dark:text-gray-100">Profile Photo</Label>
                 <div className="flex items-center gap-2">
-                  <input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={e => {
-                      const files = e.target?.files;
-                      if (files && files[0]) {
-                        setProfile(p => ({ ...p, photo: URL.createObjectURL(files[0]) }));
-                        showToast("Profile photo updated!");
-                      }
-                    }}
-                  />
+                  <div className="hidden">
+                    <input
+                      id="photo-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={e => {
+                        const files = e.target?.files;
+                        if (files && files[0]) {
+                          setProfile(p => ({ ...p, photo: URL.createObjectURL(files[0]) }));
+                          showToast("Profile photo updated!");
+                        }
+                      }}
+                    />
+                  </div>
                                         <Button
                         type="button"
                         variant="outline"
@@ -82,7 +83,7 @@ export default function Settings() {
                   {profile.photo && profile.photo !== "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face" && (
                     <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                       <Check className="w-4 h-4" />
-                      <span className="text-xs">Uploaded</span>
+                      <div className="text-xs">Uploaded</div>
                     </div>
                   )}
                 </div>
@@ -115,18 +116,19 @@ export default function Settings() {
             <div>
               <Label htmlFor="resume" className="text-left text-gray-900 dark:text-gray-100">Resume/Portfolio</Label>
               <div className="flex items-center gap-2">
-                <input
-                  id="resume"
-                  type="file"
-                  accept="application/pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"
-                  className="hidden"
-                  onChange={e => {
-                    if (e.target.files && e.target.files[0]) {
-                      setProfile(p => ({ ...p, resume: e.target.files![0].name }));
-                      showToast("Resume/portfolio uploaded!");
-                    }
-                  }}
-                />
+                <div className="hidden">
+                  <input
+                    id="resume"
+                    type="file"
+                    accept="application/pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        setProfile(p => ({ ...p, resume: e.target.files![0].name }));
+                        showToast("Resume/portfolio uploaded!");
+                      }
+                    }}
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="outline"
@@ -140,7 +142,7 @@ export default function Settings() {
                 {profile.resume && (
                   <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                     <Check className="w-4 h-4" />
-                    <span className="text-xs">{profile.resume}</span>
+                    <div className="text-xs">{profile.resume}</div>
                   </div>
                 )}
               </div>
@@ -165,7 +167,7 @@ export default function Settings() {
               <Label className="text-left text-gray-900 dark:text-gray-100">Two-Factor Authentication (2FA)</Label>
               <div className="flex items-center gap-2 mt-1">
                 <Switch id="2fa" />
-                <span className="text-xs text-gray-600 dark:text-gray-400">Enable 2FA for extra security</span>
+                <div className="text-xs text-gray-600 dark:text-gray-400">Enable 2FA for extra security</div>
               </div>
             </div>
             <div>
@@ -185,15 +187,15 @@ export default function Settings() {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <span className="text-gray-900 dark:text-gray-100">Email Alerts</span>
+              <div className="text-gray-900 dark:text-gray-100">Email Alerts</div>
               <Switch checked={notifications.email} onCheckedChange={v => setNotifications(n => ({ ...n, email: v }))} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-900 dark:text-gray-100">Push Notifications</span>
+              <div className="text-gray-900 dark:text-gray-100">Push Notifications</div>
               <Switch checked={notifications.push} onCheckedChange={v => setNotifications(n => ({ ...n, push: v }))} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-900 dark:text-gray-100">SMS Updates</span>
+              <div className="text-gray-900 dark:text-gray-100">SMS Updates</div>
               <Switch checked={notifications.sms} onCheckedChange={v => setNotifications(n => ({ ...n, sms: v }))} />
             </div>
             <Button onClick={() => showToast("Notification preferences saved!")} className="mt-2 dark:bg-blue-600 dark:hover:bg-blue-700">Save Preferences</Button>
@@ -205,7 +207,7 @@ export default function Settings() {
             <div>
               <Label className="text-left text-gray-900 dark:text-gray-100">Current Plan</Label>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-1 rounded text-xs ${plan === "Premium" ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"}`}>{plan}</span>
+                <div className={`px-2 py-1 rounded text-xs ${plan === "Premium" ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"}`}>{plan}</div>
                 <Button size="sm" variant="outline" onClick={() => { setPlan(plan === "Free" ? "Premium" : "Free"); showToast("Plan updated!"); }} className="dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700">
                   {plan === "Free" ? "Upgrade" : "Downgrade"}
                 </Button>
@@ -239,7 +241,7 @@ export default function Settings() {
               <Input value={currency} onChange={e => setCurrency(e.target.value)} className="mt-1 bg-white dark:bg-gray-700 text-left dark:text-gray-100 dark:border-gray-600" placeholder="Currency" />
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <span className="text-gray-900 dark:text-gray-100">Theme</span>
+              <div className="text-gray-900 dark:text-gray-100">Theme</div>
               <Button variant={theme === "light" ? "default" : "outline"} size="sm" onClick={() => setTheme("light")} className="dark:bg-blue-600 dark:hover:bg-blue-700"> <Sun className="w-4 h-4" /> Light</Button>
               <Button variant={theme === "dark" ? "default" : "outline"} size="sm" onClick={() => setTheme("dark")} className="dark:bg-blue-600 dark:hover:bg-blue-700"> <Moon className="w-4 h-4" /> Dark</Button>
             </div>
@@ -269,7 +271,7 @@ export default function Settings() {
       <div className="max-w-3xl mx-auto p-6">
         {/* Mobile Header */}
         <div className="sm:hidden flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+          <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">Settings</div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="p-2 dark:text-gray-100 dark:hover:bg-gray-800">
@@ -306,7 +308,7 @@ export default function Settings() {
         </div>
 
         {/* Desktop Header */}
-        <h1 className="hidden sm:block text-4xl font-bold mb-6 text-gray-900 dark:text-gray-100">Settings</h1>
+        <div className="hidden sm:block text-4xl font-bold mb-6 text-gray-900 dark:text-gray-100">Settings</div>
         
         {/* Desktop Tabs */}
         <div className="hidden sm:block">
@@ -331,19 +333,20 @@ export default function Settings() {
                   <div>
                     <Label htmlFor="photo-upload" className="block mb-1 text-left text-gray-900 dark:text-gray-100">Profile Photo</Label>
                     <div className="flex items-center gap-2">
-                      <input
-                        id="photo-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={e => {
-                          const files = e.target?.files;
-                          if (files && files[0]) {
-                            setProfile(p => ({ ...p, photo: URL.createObjectURL(files[0]) }));
-                            showToast("Profile photo updated!");
-                          }
-                        }}
-                      />
+                      <div className="hidden">
+                        <input
+                          id="photo-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={e => {
+                            const files = e.target?.files;
+                            if (files && files[0]) {
+                              setProfile(p => ({ ...p, photo: URL.createObjectURL(files[0]) }));
+                              showToast("Profile photo updated!");
+                            }
+                          }}
+                        />
+                      </div>
                       <Button
                         type="button"
                         variant="outline"
@@ -390,18 +393,19 @@ export default function Settings() {
                 <div>
                   <Label htmlFor="resume" className="text-left text-gray-900 dark:text-gray-100">Resume/Portfolio</Label>
                   <div className="flex items-center gap-2">
-                    <input
-                      id="resume"
-                      type="file"
-                      accept="application/pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"
-                      className="hidden"
-                      onChange={e => {
-                        if (e.target.files && e.target.files[0]) {
-                          setProfile(p => ({ ...p, resume: e.target.files![0].name }));
-                          showToast("Resume/portfolio uploaded!");
-                        }
-                      }}
-                    />
+                    <div className="hidden">
+                      <input
+                        id="resume"
+                        type="file"
+                        accept="application/pdf,.doc,.docx,.ppt,.pptx,.jpg,.png"
+                        onChange={e => {
+                          if (e.target.files && e.target.files[0]) {
+                            setProfile(p => ({ ...p, resume: e.target.files![0].name }));
+                            showToast("Resume/portfolio uploaded!");
+                          }
+                        }}
+                      />
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -441,7 +445,7 @@ export default function Settings() {
                   <Label className="text-left text-gray-900 dark:text-gray-100">Two-Factor Authentication (2FA)</Label>
                   <div className="flex items-center gap-2 mt-1">
                     <Switch id="2fa" />
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Enable 2FA for extra security</span>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Enable 2FA for extra security</div>
                   </div>
                 </div>
                 <div>
@@ -462,15 +466,15 @@ export default function Settings() {
             <TabsContent value="notifications">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-900 dark:text-gray-100">Email Alerts</span>
+                  <div className="text-gray-900 dark:text-gray-100">Email Alerts</div>
                   <Switch checked={notifications.email} onCheckedChange={v => setNotifications(n => ({ ...n, email: v }))} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-900 dark:text-gray-100">Push Notifications</span>
+                  <div className="text-gray-900 dark:text-gray-100">Push Notifications</div>
                   <Switch checked={notifications.push} onCheckedChange={v => setNotifications(n => ({ ...n, push: v }))} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-900 dark:text-gray-100">SMS Updates</span>
+                  <div className="text-gray-900 dark:text-gray-100">SMS Updates</div>
                   <Switch checked={notifications.sms} onCheckedChange={v => setNotifications(n => ({ ...n, sms: v }))} />
                 </div>
                 <Button onClick={() => showToast("Notification preferences saved!")} className="mt-2 dark:bg-blue-600 dark:hover:bg-blue-700">Save Preferences</Button>
@@ -483,7 +487,7 @@ export default function Settings() {
                 <div>
                   <Label className="text-left text-gray-900 dark:text-gray-100">Current Plan</Label>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-1 rounded text-xs ${plan === "Premium" ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"}`}>{plan}</span>
+                    <div className={`px-2 py-1 rounded text-xs ${plan === "Premium" ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"}`}>{plan}</div>
                     <Button size="sm" variant="outline" onClick={() => { setPlan(plan === "Free" ? "Premium" : "Free"); showToast("Plan updated!"); }} className="dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700">
                       {plan === "Free" ? "Upgrade" : "Downgrade"}
                     </Button>
@@ -518,7 +522,7 @@ export default function Settings() {
                   <Input value={currency} onChange={e => setCurrency(e.target.value)} className="mt-1 bg-white dark:bg-gray-700 text-left dark:text-gray-100 dark:border-gray-600" placeholder="Currency" />
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                  <span className="text-gray-900 dark:text-gray-100">Theme</span>
+                  <div className="text-gray-900 dark:text-gray-100">Theme</div>
                   <Button variant={theme === "light" ? "default" : "outline"} size="sm" onClick={() => setTheme("light")} className="dark:bg-blue-600 dark:hover:bg-blue-700"> <Sun className="w-4 h-4" /> Light</Button>
                   <Button variant={theme === "dark" ? "default" : "outline"} size="sm" onClick={() => setTheme("dark")} className="dark:bg-blue-600 dark:hover:bg-blue-700"> <Moon className="w-4 h-4" /> Dark</Button>
                 </div>
@@ -530,7 +534,7 @@ export default function Settings() {
             <TabsContent value="danger">
               <div className="space-y-6">
                 <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-4">
-                  <h3 className="text-red-700 dark:text-red-400 font-semibold mb-2">Danger Zone</h3>
+                  <div className="text-red-700 dark:text-red-400 font-semibold mb-2">Danger Zone</div>
                   <div className="flex flex-col gap-3">
                     <Button variant="destructive" onClick={() => setShowDeactivateModal(true)}><LogOut className="w-4 h-4 mr-1" />Deactivate Account</Button>
                     <Button variant="destructive" onClick={() => setShowDeleteModal(true)}><Trash2 className="w-4 h-4 mr-1" />Delete Account</Button>

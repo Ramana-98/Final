@@ -138,7 +138,7 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
         >
           ← Back
         </Button>
-        <h1 className="text-3xl font-bold m-0 text-gray-800 dark:text-gray-100">Your Projects</h1>
+        <div className="text-3xl font-bold m-0 text-gray-800 dark:text-gray-100">Your Projects</div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -175,11 +175,11 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
                     }}
                     id={`switch-${i}`}
                   />
-                  <label htmlFor={`switch-${i}`} className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                  <Label htmlFor={`switch-${i}`} className="text-xs text-gray-600 dark:text-gray-400 font-medium">
                     {isPaid ? "Paid" : "Not Paid"}
-                  </label>
+                  </Label>
                 </div>
-                <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mt-1">{project.rate}</p>
+                <div className="text-sm font-bold text-gray-700 dark:text-gray-300 mt-1">{project.rate}</div>
               </CardHeader>
               <CardContent className="text-xs text-gray-600 dark:text-gray-400 space-y-1 pt-0">
                 <div className="flex flex-wrap gap-1">
@@ -205,9 +205,9 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
                     );
                   })()}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                   {project.country} · {project.timeAgo}
-                </p>
+                </div>
                 <Button
                   variant="ghost"
                   className="mt-1 p-0 text-xs text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 font-medium dark:text-blue-400 dark:hover:text-blue-300"
@@ -274,12 +274,12 @@ export default function ProjectsPage({ onBack }: ProjectsPageProps) {
             </Button>
           </DialogHeader>
           <div className="space-y-2 text-sm">
-            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Rate:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.rate}</span></p>
-            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Status:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.status}</span></p>
-            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Type:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.type}</span></p>
-            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Mode:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.mode}</span></p>
-            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Country:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.country}</span></p>
-            <p className="flex justify-between text-gray-900 dark:text-gray-100"><b>Posted:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.timeAgo}</span></p>
+            <div className="flex justify-between text-gray-900 dark:text-gray-100"><b>Rate:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.rate}</span></div>
+            <div className="flex justify-between text-gray-900 dark:text-gray-100"><b>Status:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.status}</span></div>
+            <div className="flex justify-between text-gray-900 dark:text-gray-100"><b>Type:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.type}</span></div>
+            <div className="flex justify-between text-gray-900 dark:text-gray-100"><b>Mode:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.mode}</span></div>
+            <div className="flex justify-between text-gray-900 dark:text-gray-100"><b>Country:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.country}</span></div>
+            <div className="flex justify-between text-gray-900 dark:text-gray-100"><b>Posted:</b> <span className="font-semibold text-gray-700 dark:text-gray-300">{selectedProject?.timeAgo}</span></div>
           </div>
           {/* Feedback/Notes Textarea */}
           <div className="mt-6">

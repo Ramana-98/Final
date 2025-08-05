@@ -13,6 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ToastProvider, ToastViewport } from "@/components/ui/toast";
+import { Label } from "@/components/ui/label";
 import { CalendarIcon, ChevronDown, TrendingUp, Users, DollarSign, MessageSquare, Star, ArrowRight, Plus, CheckIcon, Settings, FileText, Moon, CreditCard, Building2, CheckCircle, AlertCircle, Crown, Zap, Shield, Globe } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from "recharts";
 import { cn } from "@/lib/utils";
@@ -158,16 +159,21 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={incomeTrackerRef}
         className={cn(
-          "rounded-2xl bg-white dark:bg-gray-800 p-3 sm:p-4 max-w-4xl h-[440px] hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          "rounded-2xl bg-white dark:bg-gray-800 p-3 sm:p-4 max-w-4xl h-auto min-h-[440px] sm:h-[440px] hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Income Tracker")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
         <CardHeader className="pb-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
-            <CardTitle className="text-lg sm:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
-              Income Tracker
-            </CardTitle>
+            <div className="flex flex-col gap-2">
+              <CardTitle className="text-lg sm:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
+                Income Tracker
+              </CardTitle>
+              <div className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400 break-words leading-relaxed line-clamp-2 sm:line-clamp-none">
+                Track changes in income over time and access detailed data on each project and payments received.
+              </div>
+            </div>
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm w-full sm:w-auto mt-2 sm:mt-0">
@@ -217,38 +223,35 @@ export default function Home({ searchValue }: HomeProps) {
               </PopoverContent>
             </Popover>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400 mt-1 text-left">
-            Track changes in income over time and access detailed data on each project and payments received.
-          </p>
         </CardHeader>
 
         <CardContent className="mt-0 sm:mt-0 pb-2 sm:pb-4">
           <div className="block sm:hidden mb-4 text-center">
-            <p className="text-base font-semibold text-gray-900 dark:text-gray-100">{getSummaryPercentage()}</p>
-            <p className="text-xs text-muted-foreground dark:text-gray-400">{getSummaryText()}</p>
+            <Badge variant="default" className="text-base font-semibold text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">{getSummaryPercentage()}</Badge>
+            <Badge variant="secondary" className="text-xs text-muted-foreground dark:text-gray-400 bg-transparent border-0 p-0 break-words leading-relaxed">{getSummaryText()}</Badge>
           </div>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-1 sm:gap-4 min-h-48 sm:h-62 w-full">
             <div className="hidden sm:block text-center md:text-left mb-10 sm:mb-0">
-              <p className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-gray-100">{getSummaryPercentage()}</p>
-              <p className="text-sm text-muted-foreground dark:text-gray-400">{getSummaryText()}</p>
+              <Badge variant="default" className="text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">{getSummaryPercentage()}</Badge>
+              <Badge variant="secondary" className="text-sm text-muted-foreground dark:text-gray-400 bg-transparent border-0 p-0 break-words leading-relaxed">{getSummaryText()}</Badge>
             </div>
 
             <TooltipProvider>
-              <div className="flex justify-between items-end w-full max-w-xl mx-auto gap-1 sm:gap-2 lg:gap-3 overflow-hidden px-1 sm:px-0 min-h-0">
+              <div className="flex justify-between items-end w-full max-w-xl mx-auto gap-1 sm:gap-2 lg:gap-3 px-1 sm:px-0 min-h-0 flex-wrap">
                 {currentData.map((d, i) => {
                   const normalizedValue = (d.amount - Math.min(...currentData.map(item => item.amount))) / (Math.max(...currentData.map(item => item.amount)) - Math.min(...currentData.map(item => item.amount)));
-                  const height = 20 + (normalizedValue * 120);
+                  const height = 20 + (normalizedValue * 80);
                   const isSelected = selectedDay === i;
 
                   return (
                     <Tooltip key={i}>
                       <TooltipTrigger asChild>
                         <div 
-                          className="flex flex-col items-center gap-1 cursor-pointer"
+                          className="flex flex-col items-center gap-1 cursor-pointer max-w-full"
                           onClick={() => setSelectedDay(isSelected ? null : i)}
                         >
                           {isSelected && (
-                            <div className="text-xs font-medium bg-black dark:bg-white text-white dark:text-black rounded-full px-2 py-0.5 mb-1">
+                              <div className="text-xs font-medium bg-black dark:bg-white text-white dark:text-black rounded-full px-1 py-0.5 mb-1 max-w-full overflow-hidden">
                               ${d.amount.toLocaleString()}
                             </div>
                           )}
@@ -257,7 +260,7 @@ export default function Home({ searchValue }: HomeProps) {
                               "w-1.5 sm:w-2 rounded-full bg-gradient-to-b from-[#d4d8db] to-[#f0f1f2] dark:from-gray-600 dark:to-gray-500 hover:opacity-80 transition-opacity",
                               isSelected && "bg-blue-500 dark:bg-blue-400 ring-2 ring-blue-500 dark:ring-blue-400"
                             )}
-                            style={{ height: `${height}px`, minHeight: "20px", maxHeight: "140px" }}
+                            style={{ height: `${height}px`, minHeight: "20px", maxHeight: "100px" }}
                           />
                           <div
                             className={cn(
@@ -270,8 +273,8 @@ export default function Home({ searchValue }: HomeProps) {
                         </div>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="font-medium">${d.amount.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Click to select {d.day}'s data</p>
+                      <Badge variant="default" className="font-medium bg-transparent border-0 p-0">${d.amount.toLocaleString()}</Badge>
+                      <Badge variant="secondary" className="text-xs text-muted-foreground bg-transparent border-0 p-0">Click to select {d.day}'s data</Badge>
                       </TooltipContent>
                     </Tooltip>
                   );
@@ -305,11 +308,11 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={letsConnectRef}
         className={cn(
-           "p-2 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+           "p-1 bg-gray-200 dark:bg-gray-800 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Let's Connect")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
-        <CardHeader className="-mt-4">
+        <CardHeader className="">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100">
               Let's Connect
@@ -320,27 +323,29 @@ export default function Home({ searchValue }: HomeProps) {
               className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs sm:text-sm"
               onClick={() => setShowAll((prev) => !prev)}
             >
-              <span className="hidden sm:inline">{showAll ? 'Show less' : 'See all'}</span>
-              <span className="sm:hidden">{showAll ? 'Less' : 'All'}</span>
+                          <Badge variant="secondary" className="hidden sm:inline bg-transparent border-0 p-0">{showAll ? 'Show less' : 'See all'}</Badge>
+            <Badge variant="secondary" className="sm:hidden bg-transparent border-0 p-0">{showAll ? 'Less' : 'All'}</Badge>
             </Button>
           </div>
         </CardHeader>
 
-                 <CardContent className="flex-1 overflow-hidden">
+                 <CardContent className="flex-1 overflow-hidden p-2 pt-1">
            <div className={cn(
              "h-full",
              showAll ? "overflow-y-auto scrollbar-hide" : ""
            )}>
-            <div className="space-y-2">
+            <div className="space-y-1">
             {displayedUsers.map((user, idx) => (
-              <div key={idx} className="flex items-center gap-3 p-2 rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <Avatar className="w-8 h-8">
+              <div key={idx} className="flex items-center gap-2 p-1 rounded-full bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                <Avatar className="w-7 h-7">
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
                   <AvatarFallback className="text-xs">{user.avatar}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
-                  <p className="text-xs text-muted-foreground dark:text-gray-400 truncate">{user.role}</p>
+                    <div className="flex flex-col gap-0.5">
+                      <Badge variant="default" className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate bg-transparent border-0 p-0">{user.name}</Badge>
+                      <Badge variant="secondary" className="text-xs text-muted-foreground dark:text-gray-400 truncate bg-transparent border-0 p-0">{user.role}</Badge>
+                    </div>
                 </div>
                 <div className="flex items-center gap-1">
                   <Badge variant={user.level === "Senior" ? "default" : "secondary"} className="text-xs">
@@ -350,12 +355,12 @@ export default function Home({ searchValue }: HomeProps) {
                     size="sm"
                     variant={connected[idx] ? "outline" : "default"}
                        className={cn(
-                         "w-6 h-6 p-0 rounded-full",
+                         "w-5 h-5 p-0 rounded-full",
                          connected[idx] && "border-green-500 text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
                        )}
                     onClick={() => setConnected(prev => prev.map((val, i) => i === idx ? !val : val))}
                   >
-                       {connected[idx] ? <CheckIcon className="w-3 h-3 text-green-600 dark:text-green-400" /> : <Plus className="w-3 h-3" />}
+                       {connected[idx] ? <CheckIcon className="w-2.5 h-2.5 text-green-600 dark:text-green-400" /> : <Plus className="w-2.5 h-2.5" />}
                   </Button>
                 </div>
               </div>
@@ -436,27 +441,27 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={upgradePremiumRef}
         className={cn(
-           "p-1 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-in-out transform hover:scale-105",
+           "p-1 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-in-out transform hover:scale-105",
           normalize(searchValue).includes(normalize("Upgrade Premium")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
-                   <CardHeader className="pb-3 text-left">
+                   <CardHeader className="pb-3 text-left overflow-hidden">
              <CardTitle className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 animate-fade-in">
                Unlock Premium Features
           </CardTitle>
-             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-left animate-fade-in-delay">
+             <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 text-left animate-fade-in-delay leading-relaxed break-words max-w-full">
                Get access to exclusive benefits and expand your freelancing opportunities.
              </p>
         </CardHeader>
 
-           <CardContent className="pt-4">
+           <CardContent className="pt-2">
              <Dialog open={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen}>
                <DialogTrigger asChild>
-                 <Button className="group w-full bg-gray-900 dark:bg-gray-800 text-white hover:bg-gray-800 dark:hover:bg-gray-700 rounded-lg py-3 transition-all duration-500 ease-in-out transform hover:scale-105 hover:shadow-xl hover:shadow-gray-900/20 animate-pulse hover:animate-none">
-                   <span className="flex items-center justify-between w-full">
-                     <span className="transition-all duration-300 ease-in-out group-hover:translate-x-1">Upgrade now</span>
+                 <Button className="group w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg py-3 transition-all duration-500 ease-in-out transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 animate-pulse hover:animate-none">
+                   <div className="flex items-center justify-between w-full">
+                     <Badge variant="default" className="transition-all duration-300 ease-in-out group-hover:translate-x-1 bg-transparent border-0 p-0">Upgrade now</Badge>
                      <ArrowRight className="w-4 h-4 transition-all duration-300 ease-in-out group-hover:translate-x-2 group-hover:scale-110" />
-                   </span>
+            </div>
                 </Button>
                </DialogTrigger>
                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -465,9 +470,14 @@ export default function Home({ searchValue }: HomeProps) {
                      <Crown className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
                      Choose Your Premium Plan
                    </DialogTitle>
-                   <DialogDescription className="text-center">
+                   <DialogDescription className="text-center mb-4">
                      Select the plan that best fits your needs and unlock premium features
                    </DialogDescription>
+                   <div className="text-center mb-6 px-4">
+                     <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-md mx-auto">
+                       Get access to exclusive benefits and expand your freelancing opportunities.
+                     </p>
+            </div>
                  </DialogHeader>
 
                  {/* Plan Selection */}
@@ -488,23 +498,23 @@ export default function Home({ searchValue }: HomeProps) {
                            Most Popular
                          </Badge>
                        )}
-                       <div className="text-center">
-                         <h3 className="font-semibold text-lg">{plan.name}</h3>
+                                              <div className="text-center">
+                         <Badge variant="default" className="font-semibold text-gray-900 dark:text-gray-100 text-lg bg-transparent dark:bg-transparent border-0 p-0">{plan.name}</Badge>
                          <div className="mt-2">
-                           <span className="text-3xl font-bold">${plan.price}</span>
-                           <span className="text-gray-500 dark:text-gray-400">/{plan.period}</span>
+                           <Badge variant="default" className="text-3xl text-gray-900 dark:text-gray-100 font-bold bg-transparent border-0 p-0">${plan.price}</Badge>
+                           <Badge variant="secondary" className="text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0">/{plan.period}</Badge>
             </div>
                          {plan.savings && (
-                           <p className="text-sm text-green-600 dark:text-green-400 mt-1">{plan.savings}</p>
+                           <Badge variant="outline" className="text-sm text-green-600 dark:text-green-400 mt-1 bg-transparent border-green-500">{plan.savings}</Badge>
                          )}
-            </div>
+                       </div>
             </div>
                    ))}
           </div>
           
                  {/* Premium Benefits */}
                  <div className="mb-6">
-                   <h3 className="font-semibold text-lg mb-4">Premium Benefits</h3>
+                   <Badge variant="default" className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-4 bg-transparent border-0 p-0">Premium Benefits</Badge>
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                      {benefits.map((benefit, index) => {
                        const IconComponent = benefit.icon;
@@ -512,8 +522,8 @@ export default function Home({ searchValue }: HomeProps) {
                          <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                            <IconComponent className="w-5 h-5 text-blue-500 mt-0.5" />
                            <div>
-                             <h4 className="font-medium text-sm">{benefit.title}</h4>
-                             <p className="text-xs text-gray-600 dark:text-gray-400">{benefit.description}</p>
+                             <Badge variant="default" className="font-medium text-sm bg-transparent border-0 p-0">{benefit.title}</Badge>
+                             <Badge variant="secondary" className="text-xs text-gray-600 dark:text-gray-400 bg-transparent border-0 p-0">{benefit.description}</Badge>
                            </div>
                          </div>
                        );
@@ -523,20 +533,20 @@ export default function Home({ searchValue }: HomeProps) {
 
                  {/* Payment Summary */}
                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6">
-                   <h3 className="font-semibold mb-3">Payment Summary</h3>
+                   <Badge variant="default" className="font-semibold mb-3 bg-transparent border-0 p-0">Payment Summary</Badge>
                    <div className="space-y-2">
                      <div className="flex justify-between">
-                       <span>Plan:</span>
-                       <span>{selectedPlanData?.name}</span>
+                       <Badge variant="secondary" className="bg-transparent border-0 p-0">Plan:</Badge>
+                       <Badge variant="default" className="bg-transparent border-0 p-0">{selectedPlanData?.name}</Badge>
                      </div>
                      <div className="flex justify-between">
-                       <span>Amount:</span>
-                       <span className="font-semibold">${selectedPlanData?.price}</span>
+                       <Badge variant="secondary" className="bg-transparent border-0 p-0">Amount:</Badge>
+                       <Badge variant="default" className="font-semibold bg-transparent border-0 p-0">${selectedPlanData?.price}</Badge>
                      </div>
                      <div className="border-t pt-2 mt-2">
                        <div className="flex justify-between font-semibold">
-                         <span>Total:</span>
-                         <span>${selectedPlanData?.price}</span>
+                         <Badge variant="secondary" className="bg-transparent border-0 p-0">Total:</Badge>
+                         <Badge variant="default" className="bg-transparent border-0 p-0">${selectedPlanData?.price}</Badge>
                        </div>
                      </div>
                    </div>
@@ -653,7 +663,7 @@ export default function Home({ searchValue }: HomeProps) {
       },
     ];
 
-    const displayedProjects = showAll ? allProjects : allProjects.slice(0, 5);
+    const displayedProjects = showAll ? allProjects : allProjects.slice(0, 4);
 
     return (
       <Card
@@ -685,31 +695,37 @@ export default function Home({ searchValue }: HomeProps) {
             {displayedProjects.map((project, idx) => {
               const IconComponent = project.icon;
               return (
-                <AccordionItem key={idx} value={`project-${idx}`} className="border-none">
-                  <AccordionTrigger className="hover:no-underline py-2">
-                    <div className="flex items-center justify-between w-full pr-4">
+                                 <AccordionItem key={idx} value={`project-${idx}`} className="border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors mb-2">
+                   <AccordionTrigger className="hover:no-underline py-3 px-4">
+                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3 flex-1">
-                        <IconComponent className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                        <div className="flex-1 text-left">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{project.name}</span>
-                            <span className="text-xs text-muted-foreground dark:text-gray-400">{project.rate}</span>
+                         <IconComponent className="w-4 h-4 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                         <div className="flex-1 text-left min-w-0">
+                           <div className="flex items-center gap-2 mb-1">
+                             <Badge variant="default" className="text-sm font-medium text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0 truncate">{project.name}</Badge>
                           </div>
+                           <div className="flex items-center gap-2">
                           <Badge 
                             variant={project.status === "Paid" ? "default" : "secondary"} 
-                            className="text-xs mt-1"
+                               className="text-xs"
                           >
                             {project.status}
                           </Badge>
+                             <Badge variant="outline" className="text-xs bg-transparent">
+                               {project.rate}
+                          </Badge>
+                           </div>
                         </div>
                       </div>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pt-0">
-                    <div className="space-y-3 pl-0">
-                      <p className="text-xs text-muted-foreground dark:text-gray-400 leading-relaxed text-left">
+                                     <AccordionContent className="pt-0 pb-4 px-4">
+                     <div className="space-y-4">
+                       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                         <p className="text-sm text-muted-foreground dark:text-gray-400 leading-relaxed text-left">
                         {project.description}
                       </p>
+                       </div>
                       <div className="flex flex-wrap gap-1">
                         {project.tags.map((tag, tagIdx) => (
                           <Badge 
@@ -721,9 +737,14 @@ export default function Home({ searchValue }: HomeProps) {
                           </Badge>
                         ))}
                       </div>
-                      <p className="text-xs text-muted-foreground dark:text-gray-400 text-left">
+                       <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
+                         <Badge variant="secondary" className="text-xs text-muted-foreground dark:text-gray-400 bg-transparent border-0 p-0">
                         {project.location} • {project.timeAgo}
-                      </p>
+                         </Badge>
+                         <Badge variant="outline" className="text-xs bg-transparent">
+                           {project.rate}
+                         </Badge>
+                       </div>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
@@ -740,38 +761,88 @@ export default function Home({ searchValue }: HomeProps) {
     const [date, setDate] = useState<Date>();
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-    const proposalData = [
+    // Dynamic data based on selected date
+    const getProposalData = (selectedDate?: Date) => {
+      const baseData = {
+        proposals: { count: 87, bars: 9 },
+        interviews: { count: 15, bars: 4 },
+        hires: { count: 8, bars: 3 }
+      };
+
+      if (!selectedDate) {
+        return [
       { 
         label: "Proposals sent", 
-        count: 87, 
-        bars: 9,
+            count: baseData.proposals.count, 
+            bars: baseData.proposals.bars,
         lineColor: "bg-blue-400",
         barColor: "bg-blue-500",
         inactiveBarColor: "bg-blue-200"
       },
       { 
         label: "Interviews", 
-        count: 15, 
-        bars: 4,
+            count: baseData.interviews.count, 
+            bars: baseData.interviews.bars,
         lineColor: "bg-gray-400",
         barColor: "bg-gray-600",
         inactiveBarColor: "bg-gray-200"
       },
       { 
         label: "Hires", 
-        count: 8, 
-        bars: 3,
+            count: baseData.hires.count, 
+            bars: baseData.hires.bars,
         lineColor: "bg-red-400",
         barColor: "bg-red-500",
         inactiveBarColor: "bg-red-200"
       },
     ];
+      }
+
+      // Generate dynamic data based on date
+      const dayOfYear = Math.floor((selectedDate.getTime() - new Date(selectedDate.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+      const month = selectedDate.getMonth();
+      const day = selectedDate.getDate();
+
+      // Create variations based on date
+      const proposalsVariation = Math.floor(Math.sin(dayOfYear * 0.1) * 20) + baseData.proposals.count;
+      const interviewsVariation = Math.floor(Math.cos(dayOfYear * 0.15) * 8) + baseData.interviews.count;
+      const hiresVariation = Math.floor(Math.sin(dayOfYear * 0.2) * 5) + baseData.hires.count;
+
+      return [
+        { 
+          label: "Proposals sent", 
+          count: Math.max(0, proposalsVariation), 
+          bars: Math.min(12, Math.max(1, Math.floor(proposalsVariation / 10))),
+          lineColor: "bg-blue-400",
+          barColor: "bg-blue-500",
+          inactiveBarColor: "bg-blue-200"
+        },
+        { 
+          label: "Interviews", 
+          count: Math.max(0, interviewsVariation), 
+          bars: Math.min(12, Math.max(1, Math.floor(interviewsVariation / 4))),
+          lineColor: "bg-gray-400",
+          barColor: "bg-gray-600",
+          inactiveBarColor: "bg-gray-200"
+        },
+        { 
+          label: "Hires", 
+          count: Math.max(0, hiresVariation), 
+          bars: Math.min(12, Math.max(1, Math.floor(hiresVariation / 2))),
+          lineColor: "bg-red-400",
+          barColor: "bg-red-500",
+          inactiveBarColor: "bg-red-200"
+        },
+      ];
+    };
+
+    const proposalData = getProposalData(date);
 
     return (
       <Card
         ref={proposalProgressRef}
         className={cn(
-           "p-4 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-sm hover:-translate-y-1 transition-all duration-200",
+           "p-4 bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-100 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-yellow-900/20 shadow-xs flex flex-col h-48 w-full max-w-4xl mx-auto hover:shadow-sm hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Proposal Progress")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
@@ -794,7 +865,10 @@ export default function Home({ searchValue }: HomeProps) {
                 <Calendar
                   mode="single"
                   selected={date}
-                  onSelect={setDate}
+                  onSelect={(newDate) => {
+                    setDate(newDate);
+                    setIsCalendarOpen(false);
+                  }}
                   initialFocus
                 />
               </PopoverContent>
@@ -812,11 +886,11 @@ export default function Home({ searchValue }: HomeProps) {
                   item.lineColor
                 )} />
                 
-                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {item.count}
-                </div>
                 <div className="text-xs text-muted-foreground dark:text-gray-400 font-medium">
                   {item.label}
+                </div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 transition-all duration-300">
+                  {item.count}
                 </div>
                 <div className="flex items-end justify-center gap-0.5 h-8">
                   {Array.from({ length: 12 }, (_, i) => (
@@ -876,11 +950,11 @@ export default function Home({ searchValue }: HomeProps) {
       if (active && payload && payload.length) {
         return (
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-            <p className="font-medium text-gray-900 dark:text-gray-100">{label}</p>
+            <Badge variant="default" className="font-medium text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">{label}</Badge>
             {payload.map((entry: any, index: number) => (
-              <p key={index} className="text-sm" style={{ color: entry.color }}>
+              <Badge key={index} variant="secondary" className="text-sm bg-transparent border-0 p-0" style={{ color: entry.color }}>
                 {entry.name}: ${entry.value.toLocaleString()}
-              </p>
+              </Badge>
             ))}
           </div>
         );
@@ -892,7 +966,7 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={earningBreakdownRef}
         className={cn(
-          " bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          " bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Earning Breakdown")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
@@ -998,49 +1072,57 @@ export default function Home({ searchValue }: HomeProps) {
         name: "Sarah Johnson", 
         rating: 5, 
         comment: "Excellent work and communication! The project was delivered ahead of schedule with outstanding quality. Highly recommend working with this professional.", 
-        avatar: "SJ" 
+        avatar: "SJ",
+        avatarUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "Mike Chen", 
         rating: 4, 
         comment: "Great quality, delivered on time. Very professional and responsive throughout the entire process. The technical expertise demonstrated was impressive.", 
-        avatar: "MC" 
+        avatar: "MC",
+        avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "Emma Davis", 
         rating: 5, 
         comment: "Highly recommend this professional. Exceeded all expectations and provided exceptional value. The work ethic and attention to detail were outstanding.", 
-        avatar: "ED" 
+        avatar: "ED",
+        avatarUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "David Wilson", 
         rating: 5, 
         comment: "Outstanding attention to detail and creative solutions. Will definitely work together again! The problem-solving approach was innovative and effective.", 
-        avatar: "DW" 
+        avatar: "DW",
+        avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "Lisa Rodriguez", 
         rating: 4, 
         comment: "Very reliable and skilled developer. The final product was exactly what we needed. The technical implementation was flawless.", 
-        avatar: "LR" 
+        avatar: "LR",
+        avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "James Thompson", 
         rating: 5, 
         comment: "Exceptional problem-solving skills and excellent communication. Highly satisfied with the results. The ability to understand complex requirements was impressive.", 
-        avatar: "JT" 
+        avatar: "JT",
+        avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "Maria Garcia", 
         rating: 4, 
         comment: "Professional, punctual, and delivers quality work. Great experience working together. The project was executed with precision and attention to detail.", 
-        avatar: "MG" 
+        avatar: "MG",
+        avatarUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop&crop=face"
       },
       { 
         name: "Robert Kim", 
         rating: 5, 
         comment: "Amazing work ethic and technical expertise. The project exceeded our expectations completely. The innovative approach to problem-solving was effective.", 
-        avatar: "RK" 
+        avatar: "RK",
+        avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop&crop=face"
       },
     ];
 
@@ -1056,7 +1138,7 @@ export default function Home({ searchValue }: HomeProps) {
       <Card
         ref={clientFeedbackRef}
         className={cn(
-          " bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          " bg-gradient-to-br from-pink-50 via-rose-50 to-red-100 dark:from-pink-900/20 dark:via-rose-900/20 dark:to-red-900/20 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Client Feedback")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
@@ -1066,7 +1148,7 @@ export default function Home({ searchValue }: HomeProps) {
           </CardTitle>
         </CardHeader>
 
-                 <CardContent className="flex-1 relative overflow-hidden min-h-[200px] sm:min-h-[250px]">
+                 <CardContent className="flex-1 relative overflow-hidden min-h-[200px] sm:min-h-[250px] max-h-[200px] sm:max-h-[250px]">
            <div className="relative h-full min-h-[180px] sm:min-h-[220px]">
             {feedbacks.map((feedback, idx) => (
                <div
@@ -1082,32 +1164,35 @@ export default function Home({ searchValue }: HomeProps) {
                      : "opacity-0 translate-x-full"
                   )}
                >
-                                                      <div className="flex flex-col items-center justify-center h-full text-center p-2">
-                     <Avatar className="w-8 h-8 sm:w-10 sm:h-10 mb-2">
+                                                      <div className="flex flex-col items-center justify-center h-full text-center p-2 space-y-2">
+                     <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+                       <AvatarImage src={feedback.avatarUrl} alt={feedback.name} />
                        <AvatarFallback className="text-xs sm:text-sm font-medium">{feedback.avatar}</AvatarFallback>
                   </Avatar>
-                     <div className="flex items-center gap-1 sm:gap-2 mb-2">
-                       <span className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100">{feedback.name}</span>
+                     <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                       <Badge variant="default" className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">{feedback.name}</Badge>
                        <div className="flex items-center gap-0.5">
                         {[...Array(feedback.rating)].map((_, i) => (
                            <Star key={i} className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
                     </div>
-                     <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4 sm:line-clamp-5 max-w-xs sm:max-w-sm">{feedback.comment}</p>
+                     <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4 sm:line-clamp-5 max-w-xs sm:max-w-sm break-words flex-1">{feedback.comment}</p>
                   </div>
                 </div>
             ))}
               </div>
            
            {/* Enhanced Slider Controls */}
-           <div className="absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1 sm:space-x-2">
+                      <div className="absolute bottom-2 sm:bottom-3 left-1/2 transform -translate-x-1/2 flex space-x-1 sm:space-x-2">
              {feedbacks.map((_, idx) => (
-               <button
+               <Button
                  key={idx}
+                 variant="outline"
+                 size="sm"
                  onClick={() => setCurrentIndex(idx)}
                  className={cn(
-                   "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110",
+                   "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110 p-0",
                    idx === currentIndex 
                      ? "bg-blue-500 dark:bg-blue-400 shadow-lg" 
                      : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
@@ -1117,18 +1202,22 @@ export default function Home({ searchValue }: HomeProps) {
           </div>
            
            {/* Navigation Arrows */}
-           <button
+           <Button
+             variant="outline"
+             size="sm"
              onClick={() => setCurrentIndex((prev) => (prev - 1 + feedbacks.length) % feedbacks.length)}
-             className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 opacity-80 hover:opacity-100"
+             className="absolute left-1 sm:left-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 opacity-80 hover:opacity-100 p-0"
            >
              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 rotate-90 mx-auto" />
-           </button>
-           <button
+           </Button>
+           <Button
+             variant="outline"
+             size="sm"
              onClick={() => setCurrentIndex((prev) => (prev + 1) % feedbacks.length)}
-             className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 opacity-80 hover:opacity-100"
+             className="absolute right-1 sm:right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white dark:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 opacity-80 hover:opacity-100 p-0"
            >
              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 -rotate-90 mx-auto" />
-           </button>
+           </Button>
         </CardContent>
       </Card>
     );
@@ -1221,7 +1310,7 @@ export default function Home({ searchValue }: HomeProps) {
     return (
       <Card
         className={cn(
-          "p- bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
+          "p- bg-gradient-to-br from-cyan-50 via-sky-50 to-blue-100 dark:from-cyan-900/20 dark:via-sky-900/20 dark:to-blue-900/20 shadow-xs flex flex-col h-full w-full max-w-4xl mx-auto hover:shadow-lg hover:-translate-y-1 transition-all duration-200",
           normalize(searchValue).includes(normalize("Next Payout")) && "ring-2 ring-blue-500 bg-yellow-50 dark:bg-yellow-900/20"
         )}
       >
@@ -1239,13 +1328,13 @@ export default function Home({ searchValue }: HomeProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                ${payoutData.amount.toLocaleString()}
-              </span>
+                           <Badge variant="default" className="text-2xl font-bold text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">
+               ${payoutData.amount.toLocaleString()}
+             </Badge>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <CalendarIcon className="w-4 h-4" />
-              <span>{payoutData.date}</span>
+              <Badge variant="secondary" className="bg-transparent border-0 p-0">{payoutData.date}</Badge>
             </div>
           </div>
 
@@ -1254,7 +1343,7 @@ export default function Home({ searchValue }: HomeProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Linked Projects</span>
+                <Badge variant="default" className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-transparent border-0 p-0">Linked Projects</Badge>
               </div>
               <Button
                 variant="ghost"
@@ -1273,11 +1362,11 @@ export default function Home({ searchValue }: HomeProps) {
                     <div key={idx} className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                        <span className="text-gray-600 dark:text-gray-400 truncate">{item.project}</span>
+                        <Badge variant="secondary" className="text-gray-600 dark:text-gray-400 truncate bg-transparent border-0 p-0">{item.project}</Badge>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-gray-500 dark:text-gray-400">{item.hours}h</span>
-                        <span className="font-medium text-gray-900 dark:text-gray-100">${item.amount.toLocaleString()}</span>
+                                             <Badge variant="secondary" className="text-gray-500 dark:text-gray-400 bg-transparent border-0 p-0">{item.hours}h</Badge>
+                     <Badge variant="default" className="font-medium text-gray-900 dark:text-gray-100 bg-transparent border-0 p-0">${item.amount.toLocaleString()}</Badge>
                       </div>
                     </div>
                   ))}
@@ -1287,7 +1376,7 @@ export default function Home({ searchValue }: HomeProps) {
                   {payoutData.projects.map((project, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                       <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                      <span className="truncate">{project}</span>
+                      <Badge variant="secondary" className="truncate bg-transparent border-0 p-0">{project}</Badge>
                     </div>
                   ))}
                 </div>
@@ -1299,7 +1388,7 @@ export default function Home({ searchValue }: HomeProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <CreditCard className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Bank Account</span>
+              <Badge variant="default" className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-transparent border-0 p-0">Bank Account</Badge>
             </div>
             <Popover>
               <PopoverTrigger asChild>
@@ -1308,7 +1397,7 @@ export default function Home({ searchValue }: HomeProps) {
                   size="sm"
                   className="w-full justify-between text-xs h-8"
                 >
-                  <span className="truncate">{selectedBank}</span>
+                  <Badge variant="secondary" className="truncate bg-transparent border-0 p-0">{selectedBank}</Badge>
                   <ChevronDown className="w-3 h-3" />
                 </Button>
               </PopoverTrigger>
@@ -1350,12 +1439,12 @@ export default function Home({ searchValue }: HomeProps) {
                     Are you sure you want to process a payout of ${payoutData.amount.toLocaleString()} to {selectedBank}?
                   </AlertDialogDescription>
                   <div className="mt-4">
-                    <strong className="text-sm text-muted-foreground">Linked Projects:</strong>
-                    <ul className="list-disc list-inside mt-2 space-y-1">
+                    <Badge variant="default" className="text-sm text-muted-foreground bg-transparent border-0 p-0">Linked Projects:</Badge>
+                    <div className="mt-2 space-y-1">
                       {payoutData.projects.map((project, idx) => (
-                        <li key={idx} className="text-sm text-muted-foreground">{project}</li>
+                        <Badge key={idx} variant="secondary" className="text-sm text-muted-foreground bg-transparent border-0 p-0 block">• {project}</Badge>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -1409,12 +1498,12 @@ export default function Home({ searchValue }: HomeProps) {
                     Are you sure you want to schedule a payout of ${payoutData.amount.toLocaleString()} to {selectedBank} for {scheduledDate?.toLocaleDateString()}?
                   </AlertDialogDescription>
                   <div className="mt-4">
-                    <strong className="text-sm text-muted-foreground">Linked Projects:</strong>
-                    <ul className="list-disc list-inside mt-2 space-y-1">
+                    <Badge variant="default" className="text-sm text-muted-foreground bg-transparent border-0 p-0">Linked Projects:</Badge>
+                    <div className="mt-2 space-y-1">
                       {payoutData.projects.map((project, idx) => (
-                        <li key={idx} className="text-sm text-muted-foreground">{project}</li>
+                        <Badge key={idx} variant="secondary" className="text-sm text-muted-foreground bg-transparent border-0 p-0 block">• {project}</Badge>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

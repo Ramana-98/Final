@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -17,6 +18,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Mock data
 const initialBalance = {
@@ -208,11 +217,12 @@ export default function WalletPage() {
               </div>
               {/* Right: Image */}
               <div className="flex-1 flex justify-center items-center">
-                <img
-                  src="src/atm-image.jpg"
-                  alt="ATM Withdrawal"
-                  className="max-w-[240px] max-h-[120px] rounded-md object-cover"
-                />
+                <div className="w-60 h-32 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-800 dark:to-blue-900 rounded-lg flex items-center justify-center border-2 border-dashed border-blue-300 dark:border-blue-600">
+                  <div className="text-center">
+                    <div className="text-4xl mb-2">🏧</div>
+                    <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">ATM Withdrawal</div>
+                  </div>
+                </div>
               </div>
             </div>
         </CardContent>
@@ -263,26 +273,26 @@ export default function WalletPage() {
             <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Transaction History</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <table className="min-w-full text-center border rounded-lg overflow-hidden bg-white dark:bg-gray-800">
-              <thead>
-                <tr className="bg-gray-100 dark:bg-gray-700">
-                  <th className="px-4 py-2 border-b font-semibold text-gray-700 dark:text-gray-300">Date</th>
-                  <th className="px-4 py-2 border-b font-semibold text-gray-700 dark:text-gray-300">Type</th>
-                  <th className="px-4 py-2 border-b font-semibold text-gray-700 dark:text-gray-300">Amount</th>
-                  <th className="px-4 py-2 border-b font-semibold text-gray-700 dark:text-gray-300">Status</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-100 dark:bg-gray-700">
+                  <TableHead className="text-center text-gray-700 dark:text-gray-300">Date</TableHead>
+                  <TableHead className="text-center text-gray-700 dark:text-gray-300">Type</TableHead>
+                  <TableHead className="text-center text-gray-700 dark:text-gray-300">Amount</TableHead>
+                  <TableHead className="text-center text-gray-700 dark:text-gray-300">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {transactions.map((txn, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <td className="px-4 py-2 border-b text-center text-gray-900 dark:text-gray-100">{txn.date}</td>
-                    <td className="px-4 py-2 border-b text-gray-900 dark:text-gray-100">{txn.type}</td>
-                    <td className={`px-4 py-2 border-b font-semibold ${txn.amount.startsWith('+') ? 'text-green-600 dark:text-green-400' : 'text-gray-800 dark:text-gray-200'}`}>{txn.amount}</td>
-                    <td className="px-4 py-2 border-b text-gray-900 dark:text-gray-100">{txn.status}</td>
-                  </tr>
+                  <TableRow key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <TableCell className="text-center text-gray-900 dark:text-gray-100">{txn.date}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-100">{txn.type}</TableCell>
+                    <TableCell className={`font-semibold ${txn.amount.startsWith('+') ? 'text-green-600 dark:text-green-400' : 'text-gray-800 dark:text-gray-200'}`}>{txn.amount}</TableCell>
+                    <TableCell className="text-gray-900 dark:text-gray-100">{txn.status}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
         </CardContent>
       </Card>
 
@@ -294,18 +304,26 @@ export default function WalletPage() {
             <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">Payment Schedule</CardTitle>
           </CardHeader>
         <CardContent>
-            <ul className="space-y-2 text-center">
+            <div className="space-y-3">
             {paymentSchedule.map((p, i) => (
-                <li
+                <div
                   key={i}
-                  className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-1 sm:gap-2 text-center"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
                 >
                   <span className="font-medium text-gray-900 dark:text-gray-100">{p.project}:</span>
-                  <a href="#" className="text-blue-600 hover:underline font-medium dark:text-blue-400 dark:hover:text-blue-300">{p.nextRelease}</a>
-                  <span className="text-gray-500 dark:text-gray-400">({p.status})</span>
-              </li>
+                  <Button
+                    variant="link"
+                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-0 h-auto font-medium"
+                    onClick={() => {}}
+                  >
+                    {p.nextRelease}
+                  </Button>
+                  <Badge variant="secondary" className="text-xs">
+                    {p.status}
+                  </Badge>
+              </div>
             ))}
-          </ul>
+          </div>
         </CardContent>
       </Card>
 
