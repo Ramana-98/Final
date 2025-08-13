@@ -42,7 +42,7 @@ router.post('/register', async (req, res) => {
 
     // Remove password from response
     const userResponse = user.toObject();
-    delete userResponse.password;
+    delete (userResponse as any).password;
 
     res.status(201).json({
       success: true,
@@ -83,7 +83,7 @@ router.post('/login', async (req, res) => {
 
     // Remove password from response
     const userResponse = user.toObject();
-    delete userResponse.password;
+    delete (userResponse as any).password;
 
     res.json({
       success: true,
