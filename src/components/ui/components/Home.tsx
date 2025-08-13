@@ -166,10 +166,10 @@ export default function Home({ searchValue }: HomeProps) {
         <CardHeader className="pb-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
             <div className="flex flex-col gap-2">
-              <CardTitle className="text-lg sm:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
-                Income Tracker
-              </CardTitle>
+            <CardTitle className="text-lg sm:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400" />
+              Income Tracker
+            </CardTitle>
               <div className="text-xs sm:text-sm text-muted-foreground dark:text-gray-400 break-words leading-relaxed line-clamp-2 sm:line-clamp-none">
                 Track changes in income over time and access detailed data on each project and payments received.
               </div>
