@@ -2,11 +2,20 @@ import { Request, Response } from 'express';
 import Project from '../models/Project';
 import Transaction from '../models/Transaction';
 import Wallet from '../models/Wallet';
+import User from '../models/User';
+import mongoose from 'mongoose';
 
-export const getIncomeAnalytics = async (req: Request, res: Response) => {
+interface AuthRequest extends Request {
+  user?: any;
+}
+
+export const getIncomeAnalytics = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
   try {
     const { period } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user._id;
     
     let startDate: Date;
     let endDate: Date = new Date();
@@ -22,13 +31,15 @@ export const getIncomeAnalytics = async (req: Request, res: Response) => {
         startDate = new Date(endDate.getTime() - 365 * 24 * 60 * 60 * 1000);
         break;
       default:
-        return res.status(400).json({ error: 'Invalid period' });
+        res.status(400).json({ error: 'Invalid period. Use: week, month, or year' });
+        return;
     }
 
-    // Get user's wallet
+    // Get wallet for the user
     const wallet = await Wallet.findOne({ userId });
     if (!wallet) {
-      return res.status(404).json({ error: 'Wallet not found' });
+      res.status(404).json({ error: 'Wallet not found' });
+      return;
     }
 
     // Get income data for the period
@@ -65,22 +76,22 @@ export const getIncomeAnalytics = async (req: Request, res: Response) => {
       formattedData = formatYearData(incomeData);
     }
 
-    res.json({
-      success: true,
-      data: formattedData,
-      period,
-      summary: calculateSummary(incomeData)
-    });
+    // Calculate summary statistics
+    const summary = calculateSummary(incomeData, period);
+
+    res.json({ success: true, data: formattedData, period, summary, currency: wallet.balance.currency });
+    return;
 
   } catch (error) {
     console.error('Error fetching income analytics:', error);
     res.status(500).json({ error: 'Failed to fetch income analytics' });
+    return;
   }
 };
 
-export const getProjectStats = async (req: Request, res: Response) => {
+export const getProjectStats = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     
     const stats = await Project.aggregate([
       {
@@ -90,14 +101,28 @@ export const getProjectStats = async (req: Request, res: Response) => {
         $group: {
           _id: '$status',
           count: { $sum: 1 },
-          totalEarnings: { $sum: '$totalAmount' }
+          totalEarnings: { $sum: '$totalAmount' },
+          avgRate: { $avg: '$rate' }
         }
       }
     ]);
 
+    // Get total projects count
+    const totalProjects = await Project.countDocuments({ freelancerId: userId });
+    
+    // Get recent projects
+    const recentProjects = await Project.find({ freelancerId: userId })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('clientId', 'name avatar');
+
     res.json({
       success: true,
-      data: stats
+      data: {
+        stats,
+        totalProjects,
+        recentProjects
+      }
     });
 
   } catch (error) {
@@ -106,9 +131,9 @@ export const getProjectStats = async (req: Request, res: Response) => {
   }
 };
 
-export const getClientStats = async (req: Request, res: Response) => {
+export const getClientStats = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     
     const stats = await Project.aggregate([
       {
@@ -118,7 +143,8 @@ export const getClientStats = async (req: Request, res: Response) => {
         $group: {
           _id: '$clientId',
           projectCount: { $sum: 1 },
-          totalSpent: { $sum: '$totalAmount' }
+          totalSpent: { $sum: '$totalAmount' },
+          avgProjectValue: { $avg: '$totalAmount' }
         }
       },
       {
@@ -136,9 +162,14 @@ export const getClientStats = async (req: Request, res: Response) => {
         $project: {
           clientName: '$client.name',
           clientAvatar: '$client.avatar',
+          clientAvatarUrl: '$client.avatarUrl',
           projectCount: 1,
-          totalSpent: 1
+          totalSpent: 1,
+          avgProjectValue: 1
         }
+      },
+      {
+        $sort: { totalSpent: -1 }
       }
     ]);
 
@@ -150,6 +181,64 @@ export const getClientStats = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error fetching client stats:', error);
     res.status(500).json({ error: 'Failed to fetch client statistics' });
+  }
+};
+
+export const getDashboardOverview = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get wallet balance
+    const wallet = await Wallet.findOne({ userId });
+    
+    // Get project counts by status
+    const projectStats = await Project.aggregate([
+      {
+        $match: { freelancerId: userId }
+      },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    // Get recent transactions
+    const recentTransactions = await Transaction.find({ 
+      walletId: wallet?._id 
+    })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('projectId', 'title');
+
+    // Get unread notifications count
+    const unreadNotifications = await require('../models/Notification').getUnreadCount(userId);
+
+    // Get upcoming project deadlines
+    const upcomingDeadlines = await Project.find({
+      freelancerId: userId,
+      status: 'Active',
+      endDate: { $gte: new Date() }
+    })
+      .sort({ endDate: 1 })
+      .limit(5)
+      .select('title endDate progress');
+
+    res.json({
+      success: true,
+      data: {
+        wallet: wallet || { balance: { available: 0, pending: 0, currency: 'INR' } },
+        projectStats,
+        recentTransactions,
+        unreadNotifications,
+        upcomingDeadlines
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching dashboard overview:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard overview' });
   }
 };
 
@@ -183,13 +272,30 @@ function formatYearData(data: any[]) {
   });
 }
 
-function calculateSummary(data: any[]) {
+function calculateSummary(data: any[], period: string) {
   const total = data.reduce((sum, item) => sum + item.totalAmount, 0);
   const avg = data.length > 0 ? total / data.length : 0;
+  
+  // Calculate percentage change (mock data for now)
+  let percentage = '+20%';
+  let summaryText = '';
+  
+  switch (period) {
+    case 'week':
+      summaryText = "This week's income is higher than last week's";
+      break;
+    case 'month':
+      summaryText = "This month's income is higher than last month's";
+      break;
+    case 'year':
+      summaryText = "This year's income is higher than last year's";
+      break;
+  }
+  
   return {
     total,
     average: avg,
-    percentage: '+20%' // This would be calculated based on previous period
+    percentage,
+    summaryText
   };
 }
-
